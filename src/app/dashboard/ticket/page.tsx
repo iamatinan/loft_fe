@@ -10,6 +10,7 @@
 'use client';
 
 import { AddInventoryModal } from '@/components/dashboard/modal/AddInventoryModal.tsx';
+import api from '@/utils/api';
 import {
   Box,
   Button,
@@ -24,7 +25,6 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
 import * as React from 'react';
 
@@ -54,7 +54,7 @@ export default function Page(): React.JSX.Element {
 
   const getInventory = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:4002/api/v1/inventory');
+      const response = await api.get('/inventory');
       setInventory(response.data);
     } catch (error) {
       console.error('Error fetching inventory data:', error);
@@ -63,7 +63,7 @@ export default function Page(): React.JSX.Element {
 
   const postInventory = async (data: any, callback: any) => {
     try {
-      const response = await axios.post('http://127.0.0.1:4002/api/v1/inventory', data);
+      const response = await api.post('/inventory', data);
       console.log('response', response.data);
       if (callback) callback();
       getInventory(); // Refresh inventory after adding new item

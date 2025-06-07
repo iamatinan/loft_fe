@@ -8,7 +8,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call -- Allow unsafe calls for flexibility with third-party libraries and dynamic form handling */
 /* eslint-disable @typescript-eslint/no-explicit-any -- Allow usage of 'any' type for flexibility in form handling and third-party integrations */
 'use client';
-import * as React from 'react';
+import { AddInventoryModal } from '@/components/dashboard/modal/AddInventoryModal.tsx';
+import api from '@/utils/api';
 import {
   Box,
   Button,
@@ -26,9 +27,8 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import axios from 'axios';
 import { Field, Form, Formik } from 'formik';
-import { AddInventoryModal } from '@/components/dashboard/modal/AddInventoryModal.tsx';
+import * as React from 'react';
 
 
 const FormikTextField = ({ field, form, ...props }: any) => {
@@ -70,7 +70,7 @@ export default function Page(): React.JSX.Element {
 
   const getStaff = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:4002/api/v1/management-user');
+      const response = await api.get('/management-user');
 
       setStaff(response.data.data.data);
     } catch (error) {
@@ -80,7 +80,7 @@ export default function Page(): React.JSX.Element {
 
   const postStaff = async (data: any, callback: any) => {
     try {
-      const response = await axios.post('http://127.0.0.1:4002/api/v1/management-user', data);
+      const response = await api.post('/management-user', data);
       console.log('response', response.data);
       if (callback) callback();
       getStaff(); // Refresh staff list after adding new item

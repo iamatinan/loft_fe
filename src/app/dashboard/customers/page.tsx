@@ -25,13 +25,13 @@ import * as React from 'react';
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
 import type { Customer } from '@/components/dashboard/customer/customers-table';
 import { CustomersTable } from '@/components/dashboard/customer/customers-table';
+import { AddCustomerModal } from '@/components/modal/AaddCustomerModal';
+import api from '@/utils/api';
 import { Box, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import axios from 'axios';
 import type { FieldProps } from 'formik';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { AddCustomerModal } from '@/components/modal/AaddCustomerModal';
 
 
 export interface IinitialValuesCreateCustomer {
@@ -90,7 +90,7 @@ export default function Page(): React.JSX.Element {
   const paginatedCustomers = applyPagination(customer, page, rowsPerPage);
   const getContact = async () => {
     try {
-      const response = await axios.get<{ data: { data: Customer[] } }>('http://127.0.0.1:4001/api/v1/contact');
+      const response = await api.get('/contact');
       setCustomer(response.data?.data?.data ?? []);
     } catch (error) {
       console.error('Error fetching staff data:', error);
@@ -99,7 +99,7 @@ export default function Page(): React.JSX.Element {
 
   const postStaff = async (data: any, callback: any) => {
     try {
-      await axios.post('http://127.0.0.1:4001/api/v1/contact/create', data);
+      await api.post('/contact/create', data);
       if (callback) callback();
       getContact(); // Refresh staff list after adding new item
     } catch (error) {
