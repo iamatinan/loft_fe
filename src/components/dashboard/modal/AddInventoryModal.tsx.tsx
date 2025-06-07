@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/filename-case -- a */
 /* eslint-disable import/newline-after-import -- a */
 /* eslint-disable react/react-in-jsx-scope -- a*/
 /* eslint-disable @typescript-eslint/non-nullable-type-assertion-style -- aa */
@@ -27,7 +26,7 @@ const style = {
   boxShadow: 24,
   p: 4
 };
-export function AddCustomerModal({ open, handleClose, title, children }: any): React.JSX.Element {
+export function AddInventoryModal({ open, handleClose, title, children }: any): React.JSX.Element {
   return (
     <Modal open={open} onClose={handleClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>

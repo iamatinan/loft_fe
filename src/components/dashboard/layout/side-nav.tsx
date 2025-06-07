@@ -1,20 +1,30 @@
+/* eslint-disable @typescript-eslint/non-nullable-type-assertion-style -- aa */
+/* eslint-disable @typescript-eslint/no-confusing-void-expression -- a */
+/* eslint-disable @typescript-eslint/await-thenable -- a*/
+/* eslint-disable @typescript-eslint/no-unused-vars -- a*/
+/* eslint-disable @typescript-eslint/no-unsafe-argument -- a*/
+/* eslint-disable no-promise-executor-return  -- a*/
+/* eslint-disable @typescript-eslint/no-unsafe-member-access -- aa */
+/* eslint-disable no-implicit-coercion  -- aa*/
+/* eslint-disable @typescript-eslint/no-unsafe-assignment -- Allow unsafe assignments for flexibility with third-party libraries and dynamic form handling */
+/* eslint-disable no-console -- Allow console statements for debugging and error logging in development */
+/* eslint-disable @typescript-eslint/no-floating-promises -- Allow floating promises for async effects and event handlers */
+/* eslint-disable @typescript-eslint/no-unsafe-call -- Allow unsafe calls for flexibility with third-party libraries and dynamic form handling */
+/* eslint-disable @typescript-eslint/no-explicit-any -- Allow usage of 'any' type for flexibility in form handling and third-party integrations */
 'use client';
 
-import * as React from 'react';
-import RouterLink from 'next/link';
-import { usePathname } from 'next/navigation';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { ArrowSquareUpRight as ArrowSquareUpRightIcon } from '@phosphor-icons/react/dist/ssr/ArrowSquareUpRight';
-import { CaretUpDown as CaretUpDownIcon } from '@phosphor-icons/react/dist/ssr/CaretUpDown';
+import RouterLink from 'next/link';
+import { usePathname } from 'next/navigation';
+import * as React from 'react';
 
-import type { NavItemConfig } from '@/types/nav';
-import { paths } from '@/paths';
-import { isNavItemActive } from '@/lib/is-nav-item-active';
 import { Logo } from '@/components/core/logo';
+import { isNavItemActive } from '@/lib/is-nav-item-active';
+import { paths } from '@/paths';
+import type { NavItemConfig } from '@/types/nav';
 
 import { navItems } from './config';
 import { navIcons } from './nav-icons';
