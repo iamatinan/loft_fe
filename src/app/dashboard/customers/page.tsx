@@ -1,6 +1,4 @@
-/* eslint-disable unicorn/filename-case -- a */
-/* eslint-disable no-unused-vars -- a */
-/* eslint-disable import/no-unresolved -- a*/
+/* eslint-disable import/no-unresolved -- aa*/
 /* eslint-disable unicorn/filename-case -- a */
 /* eslint-disable import/newline-after-import -- a */
 /* eslint-disable react/react-in-jsx-scope -- a*/
@@ -18,8 +16,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call -- Allow unsafe calls for flexibility with third-party libraries and dynamic form handling */
 /* eslint-disable @typescript-eslint/no-explicit-any -- Allow usage of 'any' type for flexibility in form handling and third-party integrations */
 "use client";
-import { AddCustomerModal } from '@/components/modal/AddCustomerModal';
-
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -37,6 +33,7 @@ import axios from 'axios';
 import type { FieldProps } from 'formik';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { AddCustomerModal } from '@/components/modal/AddCustomerModal';
 
 
 export interface IinitialValuesCreateCustomer {
