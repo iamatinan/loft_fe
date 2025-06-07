@@ -21,7 +21,6 @@ import RouterLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
 
-import { Logo } from '@/components/core/logo';
 import { isNavItemActive } from '@/lib/is-nav-item-active';
 import { paths } from '@/paths';
 import type { NavItemConfig } from '@/types/nav';
@@ -62,9 +61,17 @@ export function SideNav(): React.JSX.Element {
     >
       <Stack spacing={2} sx={{ p: 3 }}>
         <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
-          <Logo color="light" height={32} width={122} />
+          {/* <Logo color="light" height={32} width={122} /> */}
+          <p style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold' }}>Loft Studio</p>
+        </Box>
+        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
+          {/* <Logo color="light" height={32} width={122} /> */}
+          <p style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold' }}>ระบบจัดการหลังบ้าน</p>
         </Box>
       </Stack>
+
+
+
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
       <Box component="nav" sx={{ flex: '1 1 auto', p: '12px' }}>
         {renderNavItems({ pathname, items: navItems })}
@@ -103,11 +110,11 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
       <Box
         {...(href
           ? {
-              component: external ? 'a' : RouterLink,
-              href,
-              target: external ? '_blank' : undefined,
-              rel: external ? 'noreferrer' : undefined,
-            }
+            component: external ? 'a' : RouterLink,
+            href,
+            target: external ? '_blank' : undefined,
+            rel: external ? 'noreferrer' : undefined,
+          }
           : { role: 'button' })}
         sx={{
           alignItems: 'center',
