@@ -31,7 +31,7 @@ import axios from 'axios';
 import type { FieldProps } from 'formik';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
-import { AddCustomerModal } from '@/components/modal/AddCustomerModal';
+import { AddCustomerModal } from '@/components/modal/AaddCustomerModal';
 
 
 export interface IinitialValuesCreateCustomer {
@@ -73,7 +73,7 @@ export default function Page(): React.JSX.Element {
   function handleDataFromChild(_data: string): void {
     setDataFromChild(true);
   }
-  
+
 
   const [modalOpen, setModalOpen] = React.useState(false);
   const [customer, setCustomer] = React.useState<Customer[]>([]);

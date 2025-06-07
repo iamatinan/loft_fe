@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/filename-case -- a */
 /* eslint-disable import/newline-after-import -- a */
 /* eslint-disable react/react-in-jsx-scope -- a*/
 /* eslint-disable @typescript-eslint/non-nullable-type-assertion-style -- aa */
