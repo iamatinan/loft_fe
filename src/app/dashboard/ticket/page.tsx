@@ -64,7 +64,6 @@ export default function Page(): React.JSX.Element {
   const postInventory = async (data: any, callback: any) => {
     try {
       const response = await api.post('/inventory', data);
-      console.log('response', response.data);
       if (callback) callback();
       getInventory(); // Refresh inventory after adding new item
     } catch (error) {
@@ -92,7 +91,6 @@ export default function Page(): React.JSX.Element {
               description: '',
             }}
             onSubmit={async (values, { setSubmitting }) => {
-              console.log('ini values', values);
               await sleep(20);
               const parsedValues = {
                 ...values,

@@ -81,14 +81,12 @@ export default function Page(): React.JSX.Element {
   const postStaff = async (data: any, callback: any) => {
     try {
       const response = await api.post('/management-user', data);
-      console.log('response', response.data);
       if (callback) callback();
       getStaff(); // Refresh staff list after adding new item
     } catch (error) {
       console.error('Error posting staff data:', error);
     }
   };
-  console.log('staff', staff);
 
   React.useEffect(() => {
     getStaff();
@@ -114,7 +112,6 @@ export default function Page(): React.JSX.Element {
               userType: '',
             }}
             onSubmit={async (values, { setSubmitting }) => {
-              console.log('ini values', values);
               await sleep(20);
               postStaff(values, () => {
                 getStaff();
@@ -188,16 +185,7 @@ export default function Page(): React.JSX.Element {
             <TableBody>
               {Array.isArray(staff) && staff.length > 0 ? (
                 staff.map((member, index) => {
-                  console.log(
-                    'first name',
-                    member.firstName,
-                    'last name',
-                    member.lastName,
-                    'userType',
-                    member.userType,
-                    'branch',
-                    member.branch
-                  );
+        
                   return (
                     <TableRow key={index}>
                       <TableCell align="right">{member.firstName}</TableCell>

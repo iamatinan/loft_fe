@@ -21,6 +21,8 @@ import { z as zod } from 'zod';
 import { paths } from '@/paths';
 import { authClient } from '@/lib/auth/client';
 import { useUser } from '@/hooks/use-user';
+import axios from 'axios';
+import api from '@/utils/api';
 
 const schema = zod.object({
   email: zod.string().min(1, { message: 'Email is required' }).email(),
@@ -52,7 +54,13 @@ export function SignInForm(): React.JSX.Element {
       setIsPending(true);
 
       const { error } = await authClient.signInWithPassword(values);
-
+      // axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('custom-auth-token')}`;
+      // const auth = await api.post('/auth/login', {
+      //   email: values.email,
+      //   password: values.password,
+      // });
+      // console.log('auth', auth)
+      
       if (error) {
         setError('root', { type: 'server', message: error });
         setIsPending(false);

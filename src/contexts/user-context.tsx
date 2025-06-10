@@ -32,6 +32,8 @@ export function UserProvider({ children }: UserProviderProps): React.JSX.Element
 
       if (error) {
         logger.error(error);
+        localStorage.removeItem('custom-auth-token'); // ลบ token ที่หมดอายุ
+
         setState((prev) => ({ ...prev, user: null, error: 'Something went wrong', isLoading: false }));
         return;
       }

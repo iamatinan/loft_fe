@@ -1,6 +1,8 @@
 'use client';
 
 import type { User } from '@/types/user';
+import api from '@/utils/api';
+import React from 'react';
 
 function generateToken(): string {
   const arr = new Uint8Array(12);
@@ -53,18 +55,29 @@ class AuthClient {
 
   async signInWithPassword(params: SignInWithPasswordParams): Promise<{ error?: string }> {
     const { email, password } = params;
+    try {
+      const auth = await api.post('/auth/login', {
+        email,
+        password,
+      }).then((res) => res.data);
 
-    // Make API request
-
-    // We do not handle the API, so we'll check if the credentials match with the hardcoded ones.
-    if (email !== 'sofia@devias.io' || password !== 'Secret1') {
-      return { error: 'Invalid credentials' };
+      if (!auth || auth.error) {
+        return { error: 'Invalid credentials' };
+      }
+      // ตรวจสอบ token
+      const accessToken = auth?.data?.accessToken?.token;
+      const refreshToken = auth?.data?.refreshToken?.token;
+      if (!accessToken || !refreshToken) {
+        return { error: 'Invalid token response' };
+      }
+      localStorage.setItem('custom-auth-token', accessToken);
+      localStorage.setItem('custom-auth-refreshToken', refreshToken);
+      return {};
+    } catch (err: any) {
+      // Handle API/network error
+      const errorMsg = err?.response?.data?.meta?.message || err?.message || 'API error';
+      return { error: errorMsg };
     }
-
-    const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
-
-    return {};
   }
 
   async resetPassword(_: ResetPasswordParams): Promise<{ error?: string }> {
@@ -76,16 +89,17 @@ class AuthClient {
   }
 
   async getUser(): Promise<{ data?: User | null; error?: string }> {
-    // Make API request
-
-    // We do not handle the API, so just check if we have a token in localStorage.
     const token = localStorage.getItem('custom-auth-token');
+    if (!token) return { data: null };
 
-    if (!token) {
-      return { data: null };
+    try {
+      const res = await api.get('/user/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return { data: res.data };
+    } catch (err) {
+      return { data: null, error: 'Session expired or invalid' };
     }
-
-    return { data: user };
   }
 
   async signOut(): Promise<{ error?: string }> {

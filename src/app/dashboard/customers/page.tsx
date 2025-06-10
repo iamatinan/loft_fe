@@ -108,9 +108,7 @@ export default function Page(): React.JSX.Element {
   };
   React.useEffect(() => {
     const fetchData = async () => {
-      console.log('dataFromChild:', dataFromChild);
       if (dataFromChild) {
-        console.log('get contact again');
         await getContact();
         setDataFromChild(false); // ไม่ต้องใช้ await กับ setState
       }
