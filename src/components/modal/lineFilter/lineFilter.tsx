@@ -4,15 +4,15 @@ import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
 
-interface CustomersFiltersProps {
+interface LineFiltersProps {
   keyword: string;
   onKeywordChange: (value: string) => void;
 }
 
-export function CustomersFilters({
+export function LineFilters({
   keyword,
   onKeywordChange,
-}: CustomersFiltersProps): React.JSX.Element {
+}: LineFiltersProps): React.JSX.Element {
   const [inputValue, setInputValue] = React.useState(keyword);
   React.useEffect(() => {
     setInputValue(keyword);
@@ -35,7 +35,7 @@ export function CustomersFilters({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         fullWidth
-        placeholder="ระบุชื่อหรือเบอร์โทรศัพท์"
+        placeholder="ระบุชื่อไลน์โปรไฟล์"
         startAdornment={
           <InputAdornment position="start">
             <MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />

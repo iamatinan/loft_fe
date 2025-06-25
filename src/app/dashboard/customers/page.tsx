@@ -15,6 +15,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- Allow usage of 'any' type for flexibility in form handling and third-party integrations */
 "use client";
 import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
@@ -23,8 +24,9 @@ import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
 import * as React from 'react';
 
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
-import type { Customer } from '@/components/dashboard/customer/customers-table';
-import { CustomersTable } from '@/components/dashboard/customer/customers-table';
+// import type { Customer } from '@/components/dashboard/customer/customers-table';
+// import { CustomersTable } from '@/components/dashboard/customer/customers-table';
+import CustomersTable from '@/components/dashboard/customer/customers-table';
 import { AddCustomerModal } from '@/components/modal/AaddCustomerModal';
 import api from '@/utils/api';
 import { Box, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
@@ -32,21 +34,14 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import type { FieldProps } from 'formik';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { IinitialValuesCreateCustomer, Meta } from '@/app/interface/interface';
 
 
-export interface IinitialValuesCreateCustomer {
-  name: string;
-  lastName: string;
-  phone: string;
-  lineId: string;
-  age: number | null;
-  weight: number | null;
-  height: number | null;
-  dateOfBirth: Date | null;
-  email: string;
-  addresses: string;
-  customerType: string;
 
+
+export interface metaCustomerData {
+  data: any[];
+  meta: Meta;
 }
 
 
@@ -67,61 +62,89 @@ function FormikTextField(props: FieldProps & { label?: string; fullWidth?: boole
   );
 }
 
+// ย้าย useCustomers จาก customers-table มาไว้ที่นี่
+function useCustomers(page: number, rowsPerPage: number, keyword: string) {
+  const [data, setData] = React.useState<metaCustomerData>();
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const fetchCustomers = React.useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get('/contact', {
+        params: {
+          limit: rowsPerPage,
+          page: page + 1,
+          showDataAll: false,
+          ...(keyword ? { keyword } : {})
+        }
+      });
+      setData(response.data?.data);
+    } catch (err) {
+      setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, rowsPerPage, keyword]);
+
+  React.useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
+
+  return { data, loading, error, refetch: fetchCustomers };
+}
+
 export default function Page(): React.JSX.Element {
   const sleep = (ms: number) => new Promise((r) => { setTimeout(r, ms) });
-  const [dataFromChild, setDataFromChild] = React.useState(false);
-  function handleDataFromChild(_data: string): void {
-    setDataFromChild(true);
-  }
-
-
   const [modalOpen, setModalOpen] = React.useState(false);
-  const [customer, setCustomer] = React.useState<Customer[]>([]);
-
+  const [customer, setCustomer] = React.useState<metaCustomerData>();
   const handleClose = (): void => { setModalOpen(false); };
-  React.useEffect(() => {
-    void getContact();
-  }, []);
-
-
-  const page = 0;
-  const rowsPerPage = 5;
-
-  const paginatedCustomers = applyPagination(customer, page, rowsPerPage);
-  const getContact = async () => {
-    try {
-      const response = await api.get('/contact');
-      setCustomer(response.data?.data?.data ?? []);
-    } catch (error) {
-      console.error('Error fetching staff data:', error);
-    }
-  };
-
   const postStaff = async (data: any, callback: any) => {
     try {
       await api.post('/contact/create', data);
       if (callback) callback();
-      getContact(); // Refresh staff list after adding new item
+      // getContact(); // Refresh staff list after adding new item
     } catch (error) {
       console.error('Error posting staff data:', error);
     }
   };
-  React.useEffect(() => {
-    const fetchData = async () => {
-      if (dataFromChild) {
-        await getContact();
-        setDataFromChild(false); // ไม่ต้องใช้ await กับ setState
-      }
-    };
-
-    fetchData();
-  }, [dataFromChild]);
+  // const getContact = async () => {
+  //   try {
+  //     const response = await api.get('/contact');
+  //     // setCustomer(response.data?.data?.data ?? []);
+  //     // setCustomer(response.data?.data); // set เป็น metaCustomerData object
+  //   } catch (error) {
+  //     console.error('Error fetching staff data:', error);
+  //   }
+  // };
   const validationSchema = Yup.object({
     firstName: Yup.string().required('กรุณากรอกชื่อ'),
     lastName: Yup.string().required('กรุณากรอกนามสกุล'),
     phone: Yup.string().required('กรุณากรอกเบอร์โทร'),
     email: Yup.string().email('อีเมลไม่ถูกต้อง'),
   });
+
+  // State สำหรับตารางลูกค้า
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [keyword, setKeyword] = React.useState('');
+  const { data: customerData, loading, error, refetch } = useCustomers(page, rowsPerPage, keyword);
+
+  // Handler สำหรับเปลี่ยนหน้า/จำนวนแถว
+  const handleChangePage = (_: unknown, newPage: number) => {
+    console.log('first handleChangePage', newPage);
+    setPage(newPage);
+  };
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('first handleChangeRowsPerPage', event.target.value);
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+  const handleKeywordChange = (value: string) => {
+    setKeyword(value);
+    setPage(0);
+  };
 
   return (
     <Stack spacing={3}>
@@ -177,7 +200,6 @@ export default function Page(): React.JSX.Element {
 
               await sleep(20);
               postStaff(valuesToSubmit, () => {
-                getContact();
                 handleClose();
                 setSubmitting(false);
               });
@@ -276,18 +298,23 @@ export default function Page(): React.JSX.Element {
           </Formik>
         </AddCustomerModal>
       </Stack>
-      <CustomersFilters />
+      {/* Loading & Error */}
+      {loading && <Box display="flex" justifyContent="center" my={2}><CircularProgress /></Box>}
+      {error && <Box color="error.main">{error}</Box>}
+      <CustomersFilters
+        keyword={keyword}
+        onKeywordChange={handleKeywordChange}
+      />
       <CustomersTable
-        count={paginatedCustomers.length}
+        customer={customerData}
         page={page}
-        rows={paginatedCustomers}
         rowsPerPage={rowsPerPage}
-        sendDataToParent={handleDataFromChild}
+        count={customerData?.meta.count ?? 0}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        refetch={refetch}
       />
     </Stack >
   );
 }
 
-function applyPagination(rows: Customer[], page: number, rowsPerPage: number): Customer[] {
-  return rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-}

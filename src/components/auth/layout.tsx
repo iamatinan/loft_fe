@@ -31,7 +31,7 @@ export function Layout({ children }: LayoutProps): React.JSX.Element {
           <Box sx={{ maxWidth: '450px', width: '100%' }}>{children}</Box>
         </Box>
       </Box>
-      <Box
+      {/* <Box
         sx={{
           alignItems: 'center',
           background: 'radial-gradient(50% 50% at 50% 50%, #122647 0%, #090E23 100%)',
@@ -62,7 +62,7 @@ export function Layout({ children }: LayoutProps): React.JSX.Element {
             />
           </Box>
         </Stack>
-      </Box>
+      </Box> */}
     </Box>
   );
 }
