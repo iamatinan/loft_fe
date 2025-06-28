@@ -85,7 +85,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
     }
   };
 
-    const updateAppointmentFollowUp = async (data: any, callback: any) => {
+  const updateAppointmentFollowUp = async (data: any, callback: any) => {
     try {
       console.log('data', data);
       // สมมติว่า api.patch ถูก import จาก utils/api
@@ -222,9 +222,8 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
+                <TableCell>Hn Number</TableCell>
                 <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>address</TableCell>
                 <TableCell>Phone</TableCell>
                 <TableCell>Age</TableCell>
                 <TableCell>Line ID</TableCell>
@@ -240,9 +239,8 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                     handleClick(event);
                     setContactId(row._id);
                   }}>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.email}</TableCell>
-                  <TableCell>{row.address}</TableCell>
+                  <TableCell>{row.hnNumber}</TableCell>
+                  <TableCell>{row.firstName + ' ' + row.lastName}</TableCell>
                   <TableCell>{row.phone}</TableCell>
                   <TableCell>{row.age}</TableCell>
                   <TableCell>{row.lineId}</TableCell>
