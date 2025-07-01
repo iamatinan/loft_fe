@@ -98,11 +98,23 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string) {
 export default function Page(): React.JSX.Element {
   const sleep = (ms: number) => new Promise((r) => { setTimeout(r, ms) });
   const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalAppointmentOpen, setModalAppointmentOpen] = React.useState(false);
+  const handleCloseAppointment = (): void => { setModalAppointmentOpen(false); };
   const [customer, setCustomer] = React.useState<metaCustomerData>();
   const handleClose = (): void => { setModalOpen(false); };
   const postStaff = async (data: any, callback: any) => {
     try {
       await api.post('/contact/create', data);
+      if (callback) callback();
+      // getContact(); // Refresh staff list after adding new item
+    } catch (error) {
+      console.error('Error posting staff data:', error);
+    }
+  };
+
+  const postAppointment = async (data: any, callback: any) => {
+    try {
+      await api.patch('/contact/add-appointment', data);
       if (callback) callback();
       // getContact(); // Refresh staff list after adding new item
     } catch (error) {
@@ -163,6 +175,11 @@ export default function Page(): React.JSX.Element {
         <div>
           <Button onClick={() => { setModalOpen(true); }} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
             เพิ่มรายชื่อลูกค้า
+          </Button>
+        </div>
+        <div>
+          <Button onClick={() => { setModalAppointmentOpen(true); }} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
+            เพิ่มข้อมูลวันนัด
           </Button>
         </div>
 
@@ -289,6 +306,41 @@ export default function Page(): React.JSX.Element {
                     )}
                   </Field>
                 </Box>
+
+                <Button type="submit" disabled={isSubmitting} variant="contained" color="primary">
+                  บันทึก
+                </Button>
+              </Form>
+            )}
+          </Formik>
+        </AddCustomerModal>
+
+        <AddCustomerModal open={modalAppointmentOpen} handleClose={handleCloseAppointment} title="บันทึกข้อมูลวันนัด">
+          <Formik
+            initialValues={{
+              body: ''
+            }}
+            // validationSchema={validationSchema}
+            onSubmit={async (values, { setSubmitting }) => {
+              const valuesToSubmit: any = {
+                body: values.body,
+              }
+              console.log('xxx valuesToSubmit', valuesToSubmit);
+
+              await sleep(20);
+              postAppointment(valuesToSubmit, () => {
+                handleCloseAppointment();
+                setSubmitting(false);
+              });
+            }}
+          >
+            {({ isSubmitting, setFieldValue, values }) => (
+              <Form>
+                <Box mb={2}>
+                  <Field name="body" label="body" component={FormikTextField} fullWidth />
+                </Box>
+
+          
 
                 <Button type="submit" disabled={isSubmitting} variant="contained" color="primary">
                   บันทึก
