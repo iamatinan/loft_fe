@@ -70,7 +70,7 @@ export function MainNav(): React.JSX.Element {
             <Avatar
               onClick={userPopover.handleOpen}
               ref={userPopover.anchorRef}
-              src="/assets/avatar.png"
+              src="https://sprofile.line-scdn.net/0hgXkwL3ZbOHdGDir_XltGCDZeOx1lf2Flb24iEicJbhBzPHknb29wQ3IPYxMuaX5xbWF0ESQNMUJKHU8RWFjEQ0E-ZkB8PnojaGF1kA"
               sx={{ cursor: 'pointer' }}
             />
           </Stack>

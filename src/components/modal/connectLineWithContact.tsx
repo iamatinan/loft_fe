@@ -23,7 +23,7 @@ import { Box, Button, Card, CardActions, CardContent, Modal, Typography } from "
 import React from "react";
 import { CustomersFilters } from "../dashboard/customer/customers-filters";
 import { LineFilters } from "./lineFilter/lineFilter";
-import { metaLineProfileData } from "@/app/interface/interface";
+import { MetaLineProfileData } from "@/app/interface/interface";
 const style = {
   position: 'relative',
   top: '0%',
@@ -44,7 +44,7 @@ const listContainerStyle = {
 
 
 function useLine(page: number, rowsPerPage: number, keyword: string) {
-  const [lineProfile, setLineProfile] = React.useState<metaLineProfileData>();
+  const [lineProfile, setLineProfile] = React.useState<MetaLineProfileData>();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -52,7 +52,7 @@ function useLine(page: number, rowsPerPage: number, keyword: string) {
     setLoading(true);
     setError(null);
     try {
-      const resLineProfile = await api.get(`/line`, {
+      const resLineProfile :MetaLineProfileData= await api.get(`/line`, {
         params: {
           limit: rowsPerPage,
           page: page + 1,
@@ -61,7 +61,7 @@ function useLine(page: number, rowsPerPage: number, keyword: string) {
         }
       });
       console.log('xxxxxxxx', resLineProfile);
-      setLineProfile(resLineProfile.data);
+      setLineProfile(resLineProfile);
     } catch (err) {
       setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
     } finally {
@@ -143,11 +143,12 @@ export function ConnectLineWithContact({ open, handleClose, contactId }: any): R
   };
 
   console.log('contactDataxx', contactData);
+  console.log('line profile', lineProfile);
   return (
     <Modal sx={listContainerStyle} open={open} onClose={handleClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
-          {"กำลังเชื่อมต่อ Line กับผู้ติดต่อ"}
+          {"กำลังเชื่อมต่อ Line กับลูกค้า: "}
           {contactData ? `${contactData.name}` : 'Loading...'}
 
 
@@ -160,7 +161,7 @@ export function ConnectLineWithContact({ open, handleClose, contactId }: any): R
             onKeywordChange={handleKeywordChange}
           />
           {
-            (lineProfile?.data?.length ?? 0) > 0 ? (
+            (lineProfile?.data.length ?? 0) > 0 ? (
               <>
                 {lineProfile?.data.map((item: any, index) => (
                   <Card sx={{ maxWidth: 345 }}

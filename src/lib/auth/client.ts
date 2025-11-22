@@ -55,9 +55,10 @@ class AuthClient {
       if (!auth || auth.error) {
         return { error: 'Invalid credentials' };
       }
+      console.log('auth',auth);
       // ตรวจสอบ token
-      const accessToken = auth?.data?.accessToken?.token;
-      const refreshToken = auth?.data?.refreshToken?.token;
+      const accessToken = auth?.accessToken?.token;
+      const refreshToken = auth?.refreshToken?.token;
       if (!accessToken || !refreshToken) {
         return { error: 'Invalid token response' };
       }

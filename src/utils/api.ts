@@ -1,13 +1,27 @@
 import { paths } from '@/paths';
 import axios from 'axios';
+import type { AxiosResponse } from 'axios';
+
+// Generic API Response Type
+export interface ApiResponse<T = any> {
+  meta: {
+    code: number;
+    status: boolean;
+    message: string;
+    reqId: string;
+  };
+  data: T;
+}
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API,
 });
+
 let isRefreshing = false;
 let failedQueue: any[] = [];
+
 const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(prom => {
+  failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else {
@@ -36,8 +50,21 @@ api.interceptors.request.use((config) => {
 //   }
 // );
 api.interceptors.response.use(
-  response => response,
-  async error => {
+  (response: AxiosResponse<ApiResponse>) => {
+    // Extract data from the nested structure
+    // From: { data: { meta: {...}, data: {...} } }
+    // To: { data: {...}, meta: {...} }
+    if (response.data && response.data.data !== undefined) {
+      // console.log('data >>>', response);
+      return {
+        ...response,
+        data: response.data.data,
+        meta: response.data.meta,
+      } as any;
+    }
+    return response;
+  },
+  async (error) => {
     const originalRequest = error.config;
     if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
       const refreshToken = localStorage.getItem('custom-auth-refreshToken');
@@ -50,16 +77,13 @@ api.interceptors.response.use(
               originalRequest.headers.Authorization = 'Bearer ' + token;
               return api(originalRequest);
             })
-            .catch(err => Promise.reject(err));
+            .catch((err) => Promise.reject(err));
         }
         originalRequest._retry = true;
         isRefreshing = true;
         try {
-          const res = await axios.post(
-            `${process.env.NEXT_PUBLIC_API}/auth/refresh`,
-            { refreshToken }
-          );
-          const newToken = res.data?.data?.accessToken?.token;
+          const res = await axios.post(`${process.env.NEXT_PUBLIC_API}/auth/refresh`, { refreshToken });
+          const newToken = res.data?.accessToken?.token;
           localStorage.setItem('custom-auth-token', newToken);
           processQueue(null, newToken);
           originalRequest.headers.Authorization = 'Bearer ' + newToken;

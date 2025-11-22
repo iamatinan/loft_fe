@@ -1,4 +1,8 @@
 import * as React from 'react';
+import { CustomerInterface } from '@/app/interface/interface';
+import api from '@/utils/api';
+import { Link, LinkOff } from '@mui/icons-material';
+import { Box, Button, Card, Popover } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,16 +11,16 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { Box, Button, Card, Popover } from '@mui/material';
-import { metaCustomerData } from '@/app/dashboard/customers/page';
-import { Field, Form, Formik, FormikProps } from 'formik';
-import { MainModal } from '@/components/modal/Main';
-import * as Yup from 'yup';
 import { DatePicker } from '@mui/x-date-pickers';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import type { FormikProps } from 'formik';
+import { Field, Form, Formik } from 'formik';
+import * as Yup from 'yup';
+
 import { ConnectLineWithContact } from '@/components/modal/connectLineWithContact';
-import { Link, LinkOff } from '@mui/icons-material';
-import dayjs, { Dayjs } from 'dayjs';
-import api from '@/utils/api';
+import { MainModal } from '@/components/modal/Main';
+import { date } from 'zod';
 
 export interface IinitialValuesAppointmentDate {
   appointmentDate: Dayjs | null;
@@ -27,7 +31,7 @@ export interface IinitialValuesAppointmentFollowUp {
 }
 
 interface CustomersTableProps {
-  customer?: metaCustomerData;
+  customer?: CustomerInterface[];
   page: number;
   rowsPerPage: number;
   count: number;
@@ -45,6 +49,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
   onRowsPerPageChange,
   refetch,
 }) => {
+  console.log('customer', customer);
   const [modalConnectLineOpen, setModalConectLineOpen] = React.useState(false);
   const [modalAppointmentOpen, setModalAppointmentOpen] = React.useState(false);
   const [modalAppointmentFollowUpOpen, setModalAppointmentFollowUpOpen] = React.useState(false);
@@ -58,7 +63,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
   const handleOpenAppointment = () => setModalAppointmentOpen(true);
   const handleOpenAppointmentFollowUp = () => setModalAppointmentFollowUpOpen(true);
   const handleCloseConnectLine = async () => {
-    setModalConectLineOpen(false)
+    setModalConectLineOpen(false);
     setTimeout(() => {
       refetch();
     }, 200);
@@ -96,8 +101,21 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
     }
   };
 
-
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  const getGenderDisplay = (gender: string | null): string => {
+    if (gender === 'male') return 'ชาย';
+    if (gender === 'female') return 'หญิง';
+    return '-';
+  };
+
+  const forFirstDate = (dates: Date[] | undefined): string => {
+    if(!dates) return '-';
+    if(dates && dates.length === 0) return '-';
+    if (!dayjs(dates[0]).isValid()) return '-';
+    
+    return dayjs(dates[0]).format('DD/MM/YYYY');
+  };
 
   return (
     <Card>
@@ -108,17 +126,17 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
         onClose={handleClosePopover}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <Button color="info" variant='outlined' onClick={handleOpenAppointment}>
+        <Button color="info" variant="outlined" onClick={handleOpenAppointment}>
           กรอกวันที่นัดหมาย
         </Button>
-        <Button color="info" variant='outlined' onClick={handleOpenAppointmentFollowUp}>
+        <Button color="info" variant="outlined" onClick={handleOpenAppointmentFollowUp}>
           กรอกวันที่นัดหมายครบตามกำหนด
         </Button>
-        <Button color="info" variant='outlined' onClick={() => handleOpenConnectLineModal(contactId as string)}>
+        <Button color="info" variant="outlined" onClick={() => handleOpenConnectLineModal(contactId as string)}>
           บันทึกข้อมูลการเชื่อมต่อ Line
         </Button>
       </Popover>
-      <MainModal open={modalAppointmentOpen} handleClose={handleCloseAppointment} contactId={contactId} >
+      <MainModal open={modalAppointmentOpen} handleClose={handleCloseAppointment} contactId={contactId}>
         <Formik<IinitialValuesAppointmentDate>
           initialValues={{ appointmentDate: null }}
           validationSchema={Yup.object({
@@ -126,9 +144,12 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
           })}
           onSubmit={async (values, { setSubmitting }) => {
             const valuesToSubmit = {
-              appointmentDate: values.appointmentDate && typeof values.appointmentDate === 'object' && 'toDate' in values.appointmentDate
-                ? values.appointmentDate.toDate()
-                : null,
+              appointmentDate:
+                values.appointmentDate &&
+                typeof values.appointmentDate === 'object' &&
+                'toDate' in values.appointmentDate
+                  ? values.appointmentDate.toDate()
+                  : null,
             };
             await sleep(20);
             updateAppointment(valuesToSubmit, () => {
@@ -167,7 +188,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
         </Formik>
       </MainModal>
 
-      <MainModal open={modalAppointmentFollowUpOpen} handleClose={handleCloseAppointmentFollowUp} contactId={contactId} >
+      <MainModal open={modalAppointmentFollowUpOpen} handleClose={handleCloseAppointmentFollowUp} contactId={contactId}>
         <Formik<IinitialValuesAppointmentFollowUp>
           initialValues={{ appointmentFollowUpDate: null }}
           validationSchema={Yup.object({
@@ -176,9 +197,12 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
           onSubmit={async (values, { setSubmitting }) => {
             console.log('xxx', values);
             const valuesToSubmit = {
-              appointmentFollowUpDate: values.appointmentFollowUpDate && typeof values.appointmentFollowUpDate === 'object' && 'toDate' in values.appointmentFollowUpDate
-                ? values.appointmentFollowUpDate.toDate()
-                : null,
+              appointmentFollowUpDate:
+                values.appointmentFollowUpDate &&
+                typeof values.appointmentFollowUpDate === 'object' &&
+                'toDate' in values.appointmentFollowUpDate
+                  ? values.appointmentFollowUpDate.toDate()
+                  : null,
             };
             await sleep(20);
             updateAppointmentFollowUp(valuesToSubmit, () => {
@@ -222,39 +246,40 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
-                <TableCell>Hn Number</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Phone</TableCell>
-                <TableCell>Age</TableCell>
-                <TableCell>Line ID</TableCell>
+                <TableCell>HN Number</TableCell>
+                <TableCell>เลขบัตรประชาชน</TableCell>
+                <TableCell>ชื่อ-นามสกุล</TableCell>
+                <TableCell>เพศ</TableCell>
+                <TableCell>อายุ</TableCell>
+                <TableCell>เบอร์โทร</TableCell>
+                <TableCell>จัดฟัน</TableCell>
                 <TableCell>วันที่นัดหมาย</TableCell>
                 <TableCell>วันที่นัดหมายติดตาม</TableCell>
-                <TableCell>เชื่อมต่อ line</TableCell>
+                <TableCell>เชื่อมต่อ Line</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {customer?.data?.map((row) => (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row._id}
+              {customer?.map((row) => (
+                <TableRow
+                  hover
+                  role="checkbox"
+                  tabIndex={-1}
+                  key={row._id}
                   onClick={(event: React.MouseEvent<HTMLTableRowElement>) => {
                     handleClick(event);
                     setContactId(row._id);
-                  }}>
+                  }}
+                >
                   <TableCell>{row.hnNumber}</TableCell>
-                  <TableCell>{row.firstName + ' ' + row.lastName}</TableCell>
-                  <TableCell>{row.phone}</TableCell>
+                  <TableCell>{row.idCard || '-'}</TableCell>
+                  <TableCell>{`${row.firstName} ${row.lastName}`}</TableCell>
+                  <TableCell>{getGenderDisplay(row.gender)}</TableCell>
                   <TableCell>{row.age}</TableCell>
-                  <TableCell>{row.lineId}</TableCell>
-                  <TableCell>
-                    {row.appointmentDate
-                      ? new Date(row.appointmentDate).toLocaleDateString()
-                      : 'N/A'}
-                  </TableCell>
-                  <TableCell>
-                    {row.appointmentFollowUp
-                      ? new Date(row.appointmentFollowUp).toLocaleDateString()
-                      : 'N/A'}
-                  </TableCell>
-                  <TableCell>{row.isConnectLine ? (<Link />) : (<LinkOff />)}</TableCell>
+                  <TableCell>{row.phone}</TableCell>
+                  <TableCell>{row.isOrthodontics ? 'ใช่' : 'ไม่'}</TableCell>
+                  <TableCell>{forFirstDate(row.appointmentDate)}</TableCell>
+                  <TableCell>{forFirstDate(row.appointmentFollowUp)}</TableCell>
+                  <TableCell>{row.isConnectLine ? <Link /> : <LinkOff />}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

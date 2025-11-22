@@ -1,48 +1,26 @@
-/* eslint-disable import/newline-after-import -- a */
-/* eslint-disable react/react-in-jsx-scope -- a*/
-/* eslint-disable @typescript-eslint/non-nullable-type-assertion-style -- aa */
-/* eslint-disable @typescript-eslint/no-confusing-void-expression -- a */
-/* eslint-disable @typescript-eslint/await-thenable -- a*/
-/* eslint-disable @typescript-eslint/no-unused-vars -- a*/
-/* eslint-disable @typescript-eslint/no-unsafe-argument -- a*/
-/* eslint-disable no-promise-executor-return  -- a*/
-/* eslint-disable @typescript-eslint/no-unsafe-member-access -- aa */
-/* eslint-disable no-implicit-coercion  -- aa*/
-/* eslint-disable @typescript-eslint/no-unsafe-assignment -- Allow unsafe assignments for flexibility with third-party libraries and dynamic form handling */
-/* eslint-disable no-console -- Allow console statements for debugging and error logging in development */
-/* eslint-disable @typescript-eslint/no-floating-promises -- Allow floating promises for async effects and event handlers */
-/* eslint-disable @typescript-eslint/no-unsafe-call -- Allow unsafe calls for flexibility with third-party libraries and dynamic form handling */
-/* eslint-disable @typescript-eslint/no-explicit-any -- Allow usage of 'any' type for flexibility in form handling and third-party integrations */
-"use client";
+'use client';
+
+import * as React from 'react';
+import type { IinitialValuesCreateCustomer, MetaCustomerData } from '@/app/interface/interface';
+import api from '@/utils/api';
+import { Box, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
-import * as React from 'react';
+import type { FieldProps } from 'formik';
+import { Field, Form, Formik } from 'formik';
+import * as Yup from 'yup';
 
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
 // import type { Customer } from '@/components/dashboard/customer/customers-table';
 // import { CustomersTable } from '@/components/dashboard/customer/customers-table';
 import CustomersTable from '@/components/dashboard/customer/customers-table';
 import { AddCustomerModal } from '@/components/modal/AaddCustomerModal';
-import api from '@/utils/api';
-import { Box, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import type { FieldProps } from 'formik';
-import { Field, Form, Formik } from 'formik';
-import * as Yup from 'yup';
-import { IinitialValuesCreateCustomer, Meta } from '@/app/interface/interface';
-
-
-
-
-export interface metaCustomerData {
-  data: any[];
-  meta: Meta;
-}
 
 
 function FormikTextField(props: FieldProps & { label?: string; fullWidth?: boolean }): React.JSX.Element {
@@ -64,7 +42,7 @@ function FormikTextField(props: FieldProps & { label?: string; fullWidth?: boole
 
 // ย้าย useCustomers จาก customers-table มาไว้ที่นี่
 function useCustomers(page: number, rowsPerPage: number, keyword: string) {
-  const [data, setData] = React.useState<metaCustomerData>();
+  const [data, setData] = React.useState<MetaCustomerData>();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -72,15 +50,18 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string) {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/contact', {
+      console.log(' fet customers');
+      const response :MetaCustomerData= await api.get('/contact', {
         params: {
           limit: rowsPerPage,
           page: page + 1,
           showDataAll: false,
-          ...(keyword ? { keyword } : {})
-        }
+          ...(keyword ? { keyword } : {}),
+        },
       });
-      setData(response.data?.data);
+      // Interceptor ใน api.ts จะแปลง response.data.data -> response.data แล้ว
+      console.log('customer res', response);
+      setData(response);
     } catch (err) {
       setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
     } finally {
@@ -89,19 +70,25 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string) {
   }, [page, rowsPerPage, keyword]);
 
   React.useEffect(() => {
-    fetchCustomers();
+    void fetchCustomers();
   }, [fetchCustomers]);
 
   return { data, loading, error, refetch: fetchCustomers };
 }
 
 export default function Page(): React.JSX.Element {
-  const sleep = (ms: number) => new Promise((r) => { setTimeout(r, ms) });
+  const sleep = (ms: number) =>
+    new Promise((r) => {
+      setTimeout(r, ms);
+    });
   const [modalOpen, setModalOpen] = React.useState(false);
   const [modalAppointmentOpen, setModalAppointmentOpen] = React.useState(false);
-  const handleCloseAppointment = (): void => { setModalAppointmentOpen(false); };
-  const [customer, setCustomer] = React.useState<metaCustomerData>();
-  const handleClose = (): void => { setModalOpen(false); };
+  const handleCloseAppointment = (): void => {
+    setModalAppointmentOpen(false);
+  };
+  const handleClose = (): void => {
+    setModalOpen(false);
+  };
   const postStaff = async (data: any, callback: any) => {
     try {
       await api.post('/contact/create', data);
@@ -149,7 +136,6 @@ export default function Page(): React.JSX.Element {
     setPage(newPage);
   };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('first handleChangeRowsPerPage', event.target.value);
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
@@ -157,6 +143,8 @@ export default function Page(): React.JSX.Element {
     setKeyword(value);
     setPage(0);
   };
+
+  console.log('at fist customer', customerData);
 
   return (
     <Stack spacing={3}>
@@ -173,12 +161,24 @@ export default function Page(): React.JSX.Element {
           </Stack>
         </Stack>
         <div>
-          <Button onClick={() => { setModalOpen(true); }} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
+          <Button
+            onClick={() => {
+              setModalOpen(true);
+            }}
+            startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
+            variant="contained"
+          >
             เพิ่มรายชื่อลูกค้า
           </Button>
         </div>
         <div>
-          <Button onClick={() => { setModalAppointmentOpen(true); }} startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />} variant="contained">
+          <Button
+            onClick={() => {
+              setModalAppointmentOpen(true);
+            }}
+            startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
+            variant="contained"
+          >
             เพิ่มข้อมูลวันนัด
           </Button>
         </div>
@@ -208,12 +208,11 @@ export default function Page(): React.JSX.Element {
                 age: values.age ? Number(values.age) : null,
                 weight: values.weight ? Number(values.weight) : null,
                 height: values.height ? Number(values.height) : null,
-                dateOfBirth: values.dateOfBirth
-                  ? new Date(values.dateOfBirth) : null,
+                dateOfBirth: values.dateOfBirth ? new Date(values.dateOfBirth) : null,
                 email: values.email.trim(),
                 addresses: values.addresses.trim(),
                 customerType: values.customerType.trim(),
-              }
+              };
 
               await sleep(20);
               postStaff(valuesToSubmit, () => {
@@ -294,12 +293,7 @@ export default function Page(): React.JSX.Element {
                         <FormLabel component="legend">ประเภทลูกค้า</FormLabel>
                         <RadioGroup {...field} row>
                           {['บุคคล', 'บริษัท'].map((type) => (
-                            <FormControlLabel
-                              key={type}
-                              value={type}
-                              control={<Radio />}
-                              label={type}
-                            />
+                            <FormControlLabel key={type} value={type} control={<Radio />} label={type} />
                           ))}
                         </RadioGroup>
                       </>
@@ -318,13 +312,13 @@ export default function Page(): React.JSX.Element {
         <AddCustomerModal open={modalAppointmentOpen} handleClose={handleCloseAppointment} title="บันทึกข้อมูลวันนัด">
           <Formik
             initialValues={{
-              body: ''
+              body: '',
             }}
             // validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting }) => {
               const valuesToSubmit: any = {
                 body: values.body,
-              }
+              };
               console.log('xxx valuesToSubmit', valuesToSubmit);
 
               await sleep(20);
@@ -340,8 +334,6 @@ export default function Page(): React.JSX.Element {
                   <Field name="body" label="body" component={FormikTextField} fullWidth />
                 </Box>
 
-          
-
                 <Button type="submit" disabled={isSubmitting} variant="contained" color="primary">
                   บันทึก
                 </Button>
@@ -351,14 +343,15 @@ export default function Page(): React.JSX.Element {
         </AddCustomerModal>
       </Stack>
       {/* Loading & Error */}
-      {loading && <Box display="flex" justifyContent="center" my={2}><CircularProgress /></Box>}
+      {loading && (
+        <Box display="flex" justifyContent="center" my={2}>
+          <CircularProgress />
+        </Box>
+      )}
       {error && <Box color="error.main">{error}</Box>}
-      <CustomersFilters
-        keyword={keyword}
-        onKeywordChange={handleKeywordChange}
-      />
+      <CustomersFilters keyword={keyword} onKeywordChange={handleKeywordChange} />
       <CustomersTable
-        customer={customerData}
+        customer={customerData?.data}
         page={page}
         rowsPerPage={rowsPerPage}
         count={customerData?.meta.count ?? 0}
@@ -366,7 +359,6 @@ export default function Page(): React.JSX.Element {
         onRowsPerPageChange={handleChangeRowsPerPage}
         refetch={refetch}
       />
-    </Stack >
+    </Stack>
   );
 }
-

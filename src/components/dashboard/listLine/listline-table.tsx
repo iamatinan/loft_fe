@@ -1,4 +1,7 @@
-import * as React from 'react';
+import { LineProfileInterface, MetaLineProfileData } from '@/app/interface/interface';
+import api from '@/utils/api';
+import { Link, LinkOff } from '@mui/icons-material';
+import { Box, Button, Card, Popover } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -7,24 +10,22 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
-import { Box, Button, Card, Popover } from '@mui/material';
-import { metaCustomerData } from '@/app/dashboard/customers/page';
-import { Field, Form, Formik, FormikProps } from 'formik';
-import { MainModal } from '@/components/modal/Main';
-import * as Yup from 'yup';
 import { DatePicker } from '@mui/x-date-pickers';
-import { ConnectLineWithContact } from '@/components/modal/connectLineWithContact';
-import { Link, LinkOff } from '@mui/icons-material';
 import dayjs, { Dayjs } from 'dayjs';
-import api from '@/utils/api';
-import { metaLineProfileData } from '@/app/interface/interface';
+import { Field, Form, Formik, FormikProps } from 'formik';
+import * as React from 'react';
+import * as Yup from 'yup';
+
+import { ConnectLineWithContact } from '@/components/modal/connectLineWithContact';
+import { MainModal } from '@/components/modal/Main';
+import { ConnectCustomerWithLine } from '@/components/modal/connectCustomerWithLine';
 
 export interface IinitialValuesAppointmentDate {
   appointmentDate: Dayjs | null;
 }
 
 interface CustomersTableProps {
-  lineData?: metaLineProfileData;
+  lineData?: MetaLineProfileData;
   page: number;
   rowsPerPage: number;
   count: number;
@@ -46,14 +47,15 @@ const ListLineTable: React.FC<CustomersTableProps> = ({
   const [modalAppointmentOpen, setModalAppointmentOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const [contactId, setContactId] = React.useState<string | null>(null);
+  const [lineProfileId, setLineProfileId] = React.useState<string | null>(null);
 
   const handleOpenConnectLineModal = (id: string) => {
-    setContactId(id);
+    setLineProfileId(id);
     setModalConectLineOpen(true);
   };
   const handleOpenAppointment = () => setModalAppointmentOpen(true);
   const handleCloseConnectLine = async () => {
-    setModalConectLineOpen(false)
+    setModalConectLineOpen(false);
     setTimeout(() => {
       refetch();
     }, 200);
@@ -86,14 +88,14 @@ const ListLineTable: React.FC<CustomersTableProps> = ({
         onClose={handleClosePopover}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
-        <Button color="info" variant='outlined' onClick={handleOpenAppointment}>
+        <Button color="info" variant="outlined" onClick={handleOpenAppointment}>
           กรอกวันที่นัดหมาย
         </Button>
-        <Button color="info" variant='outlined' onClick={() => handleOpenConnectLineModal(contactId as string)}>
-          บันทึกข้อมูลการเชื่อมต่อ Line
+        <Button color="info" variant="outlined" onClick={() => handleOpenConnectLineModal(lineProfileId as string)}>
+          เชื่อมต่อ Line กับลูกค้า
         </Button>
       </Popover>
-      <MainModal open={modalAppointmentOpen} handleClose={handleCloseAppointment} contactId={contactId} >
+      <MainModal open={modalAppointmentOpen} handleClose={handleCloseAppointment} contactId={contactId}>
         <Formik<IinitialValuesAppointmentDate>
           initialValues={{ appointmentDate: null }}
           validationSchema={Yup.object({
@@ -101,9 +103,12 @@ const ListLineTable: React.FC<CustomersTableProps> = ({
           })}
           onSubmit={async (values, { setSubmitting }) => {
             const valuesToSubmit = {
-              appointmentDate: values.appointmentDate && typeof values.appointmentDate === 'object' && 'toDate' in values.appointmentDate
-                ? values.appointmentDate.toDate()
-                : null,
+              appointmentDate:
+                values.appointmentDate &&
+                typeof values.appointmentDate === 'object' &&
+                'toDate' in values.appointmentDate
+                  ? values.appointmentDate.toDate()
+                  : null,
             };
             await sleep(20);
             updateAppointment(valuesToSubmit, () => {
@@ -141,7 +146,7 @@ const ListLineTable: React.FC<CustomersTableProps> = ({
           )}
         </Formik>
       </MainModal>
-      <ConnectLineWithContact open={modalConnectLineOpen} handleClose={handleCloseConnectLine} contactId={contactId} />
+      <ConnectCustomerWithLine open={modalConnectLineOpen} handleClose={handleCloseConnectLine} lineProfileId={lineProfileId as string} />
       <Paper sx={{ width: '100%' }}>
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader aria-label="sticky table">
@@ -154,24 +159,36 @@ const ListLineTable: React.FC<CustomersTableProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {lineData?.data?.map((row) => (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row._id}
-                  onClick={(event: React.MouseEvent<HTMLTableRowElement>) => {
-                    handleClick(event);
-                    setContactId(row._id);
-                  }}>
-                  <TableCell>{row.displayName}</TableCell>
-                  <TableCell>{row.contactId?.name} {row.contactId?.lastName}</TableCell>
-                  <TableCell>
-                    {row.connectLineAt ? dayjs(row.connectLineAt).format('DD/MM/YYYY') : 'ยังไม่ระบุ'}
+              {lineData?.data && lineData.data.length > 0 ? (
+                lineData.data.map((row) => (
+                  <TableRow
+                    hover
+                    role="checkbox"
+                    tabIndex={-1}
+                    key={row._id}
+                    onClick={(event: React.MouseEvent<HTMLTableRowElement>) => {
+                      handleClick(event);
+                      setLineProfileId(row._id);
+                      setContactId(row.contactId?._id || null);
+                    }}
+                  >
+                    <TableCell>{row.displayName}</TableCell>
+                    <TableCell>
+                      {row.contactId?.firstName} {row.contactId?.lastName}
+                    </TableCell>
+                    <TableCell>
+                      {row.connectLineAt ? dayjs(row.connectLineAt).format('DD/MM/YYYY') : 'ยังไม่ระบุ'}
+                    </TableCell>
+                    <TableCell>{row.contactId ? <Link /> : <LinkOff />}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    ไม่พบข้อมูล
                   </TableCell>
-                  <TableCell>{row.contactId ? (<Link />) : (<LinkOff />)}</TableCell>
-
-
-
-
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>

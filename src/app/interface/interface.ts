@@ -1,4 +1,3 @@
-import { Dayjs } from "dayjs";
 
 // export interface IinitialValuesLineProfile {
 //     _id: string;
@@ -15,7 +14,7 @@ import { Dayjs } from "dayjs";
 //     connectLineAt: Date | null;
 //     connectLineBy: string | null;
 // }
-export interface ILineProfile {
+export interface LineProfileInterface {
     _id: string;
     userId: string;
     displayName: string;
@@ -26,31 +25,46 @@ export interface ILineProfile {
     updatedAt: Date;
     createdBy: string;
     updatedBy: string;
-    contactId: ICUSTOMER | null;
+    contactId: CustomerInterface | null;
     connectLineAt: Date | null;
     connectLineBy: string | null;
 }
 
 
-export interface metaLineProfileData {
-    data: ILineProfile[];
+export interface MetaLineProfileData {
+    data: LineProfileInterface[];
     meta: Meta;
 }
 
-export interface ICUSTOMER {
-    name: string;
+export interface CustomerInterface {
+    _id: string;
+    hnNumber: string;
+    idCard: string;
+    firstName: string;
     lastName: string;
-    phone: string;
-    lineId: ILineProfile | null;
-    age: number | null;
-    weight: number | null;
-    height: number | null;
+    gender: string | null;
+    isOrthodontics: boolean;
+    lineId: string | null;
     dateOfBirth: Date | null;
-    email: string;
-    addresses: string;
-    customerType: string;
-    connectLineAt: Date | null;
-    connectLineBy: string | null;
+    age: number;
+    phone: string;
+    isConnectLine: boolean;
+    lineProfileId: string | null;
+    appointmentDate: Date[];
+    appointmentFollowUp: Date[];
+    deleted: boolean;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+    // Legacy fields for backward compatibility
+    name?: string;
+    weight?: number | null;
+    height?: number | null;
+    email?: string;
+    addresses?: string;
+    customerType?: string;
+    connectLineAt?: Date | null;
+    connectLineBy?: string | null;
 }
 export interface IinitialValuesCreateCustomer {
     name: string;
@@ -81,7 +95,7 @@ export interface Meta {
 
 }
 
-export interface metaCustomerData {
-    data: any[];
+export interface MetaCustomerData {
+    data: CustomerInterface[];
     meta: Meta;
 }
