@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { Typography } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
@@ -19,8 +20,16 @@ import { UserPopover } from './user-popover';
 
 export function MainNav(): React.JSX.Element {
   const [openNav, setOpenNav] = React.useState<boolean>(false);
+  const [userEmail, setUserEmail] = React.useState<string>('');
 
   const userPopover = usePopover<HTMLDivElement>();
+
+  React.useEffect(() => {
+    const email = localStorage.getItem('user-email');
+    if (email) {
+      setUserEmail(email);
+    }
+  }, []);
 
   return (
     <React.Fragment>
@@ -67,10 +76,13 @@ export function MainNav(): React.JSX.Element {
                 </IconButton>
               </Badge>
             </Tooltip>
+            <Typography color="text.secondary" variant="body2">
+              {userEmail || 'No email'}{' '}
+            </Typography>
             <Avatar
               onClick={userPopover.handleOpen}
               ref={userPopover.anchorRef}
-              src="https://sprofile.line-scdn.net/0hgXkwL3ZbOHdGDir_XltGCDZeOx1lf2Flb24iEicJbhBzPHknb29wQ3IPYxMuaX5xbWF0ESQNMUJKHU8RWFjEQ0E-ZkB8PnojaGF1kA"
+              src="../../../assets/avatars/avatar-1.png"
               sx={{ cursor: 'pointer' }}
             />
           </Stack>

@@ -60,7 +60,6 @@ function useLine(page: number, rowsPerPage: number, keyword: string) {
           ...(keyword ? { keyword } : {})
         }
       });
-      console.log('xxxxxxxx', resLineProfile);
       setLineProfile(resLineProfile);
     } catch (err) {
       setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');

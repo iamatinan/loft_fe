@@ -195,7 +195,6 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
             appointmentFollowUpDate: Yup.mixed().nullable().required('กรุณาเลือกวันที่นัดหมาย'),
           })}
           onSubmit={async (values, { setSubmitting }) => {
-            console.log('xxx', values);
             const valuesToSubmit = {
               appointmentFollowUpDate:
                 values.appointmentFollowUpDate &&

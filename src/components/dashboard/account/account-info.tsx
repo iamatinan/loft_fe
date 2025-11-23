@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 
 const user = {
   name: 'test user',
-  avatar: 'https://sprofile.line-scdn.net/0hgXkwL3ZbOHdGDir_XltGCDZeOx1lf2Flb24iEicJbhBzPHknb29wQ3IPYxMuaX5xbWF0ESQNMUJKHU8RWFjEQ0E-ZkB8PnojaGF1kA',
+  avatar: './../../assets/avatars/avatar-1.png',
   jobTitle: 'Senior Developer',
   country: 'USA',
   city: 'Los Angeles',

@@ -1,7 +1,8 @@
 'use client';
 
-import type { User } from '@/types/user';
 import api from '@/utils/api';
+
+import type { User } from '@/types/user';
 
 function generateToken(): string {
   const arr = new Uint8Array(12);
@@ -47,15 +48,17 @@ class AuthClient {
   async signInWithPassword(params: SignInWithPasswordParams): Promise<{ error?: string }> {
     const { email, password } = params;
     try {
-      const auth = await api.post('/auth/login', {
-        email,
-        password,
-      }).then((res) => res.data);
+      const auth = await api
+        .post('/auth/login', {
+          email,
+          password,
+        })
+        .then((res) => res.data);
 
       if (!auth || auth.error) {
         return { error: 'Invalid credentials' };
       }
-      console.log('auth',auth);
+      console.log('auth', auth);
       // ตรวจสอบ token
       const accessToken = auth?.accessToken?.token;
       const refreshToken = auth?.refreshToken?.token;
@@ -86,8 +89,21 @@ class AuthClient {
 
     try {
       const res = await api.get('/user/me', {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
+      console.log('res', res);
+      localStorage.setItem('user-email', res.data.email);
+      localStorage.setItem('user-img', res.data.img||'');
+
+      if(res.data.firstName && res.data.lastName ){
+        console.log('res.data.', res.data.firstName );
+        localStorage.setItem('user-name', res.data.firstName + ' ' + res.data.lastName);
+      }
+      
+      else {
+        localStorage.setItem('user-name', res.data.email);
+      }
+
       return { data: res.data };
     } catch (err) {
       return { data: null, error: 'Session expired or invalid' };

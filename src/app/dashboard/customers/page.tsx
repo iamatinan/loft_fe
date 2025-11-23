@@ -22,7 +22,6 @@ import { CustomersFilters } from '@/components/dashboard/customer/customers-filt
 import CustomersTable from '@/components/dashboard/customer/customers-table';
 import { AddCustomerModal } from '@/components/modal/AaddCustomerModal';
 
-
 function FormikTextField(props: FieldProps & { label?: string; fullWidth?: boolean }): React.JSX.Element {
   const { field, form, ...rest } = props;
   const { name } = field;
@@ -51,7 +50,7 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string) {
     setError(null);
     try {
       console.log(' fet customers');
-      const response :MetaCustomerData= await api.get('/contact', {
+      const response: MetaCustomerData = await api.get('/contact', {
         params: {
           limit: rowsPerPage,
           page: page + 1,
@@ -101,6 +100,7 @@ export default function Page(): React.JSX.Element {
 
   const postAppointment = async (data: any, callback: any) => {
     try {
+      console.log('data', data);
       await api.patch('/contact/add-appointment', data);
       if (callback) callback();
       // getContact(); // Refresh staff list after adding new item
@@ -316,10 +316,13 @@ export default function Page(): React.JSX.Element {
             }}
             // validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting }) => {
-              const valuesToSubmit: any = {
-                body: values.body,
+              console.log('value >>', values);
+              const valuesToSubmit: {
+                data: string;
+              } = {
+                data: values.body,
               };
-              console.log('xxx valuesToSubmit', valuesToSubmit);
+              console.log('yyyy zvaluesToSubmit', valuesToSubmit);
 
               await sleep(20);
               postAppointment(valuesToSubmit, () => {
