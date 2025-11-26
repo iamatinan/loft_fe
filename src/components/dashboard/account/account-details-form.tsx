@@ -22,6 +22,22 @@ const states = [
 ] as const;
 
 export function AccountDetailsForm(): React.JSX.Element {
+  const [userData, setUserData] = React.useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+  });
+
+  React.useEffect(() => {
+    const email = localStorage.getItem('user-email');
+    if (email) {
+      setUserData((prevData) => ({
+        ...prevData,
+        email: email,
+      }));
+    }
+    
+  }, []);
   return (
     <form
       onSubmit={(event) => {

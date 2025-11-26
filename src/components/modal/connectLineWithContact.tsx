@@ -174,7 +174,7 @@ export function ConnectLineWithContact({ open, handleClose, contactId }: any): R
                         สถานะ: {item.statusMessage}
                       </Typography>
                       <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        เชื่อมต่อกับผู้ติดต่อ: {item.contactId ? item.contactId?.name : 'ยังไม่ระบุ'}
+                        เชื่อมต่อกับผู้ติดต่อ: {item.contactId ? item.contactId?.firstName  + ' ' + item.contactId?.lastName : 'ยังไม่ระบุ'}
                       </Typography>
                     </CardContent>
                     <CardActions>
