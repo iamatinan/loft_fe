@@ -64,7 +64,7 @@ export function AccountDetailsForm(): React.JSX.Element {
             <Grid md={6} xs={12}>
               <FormControl fullWidth required>
                 <InputLabel>Email address</InputLabel>
-                <OutlinedInput defaultValue="sofia@devias.io" label="Email address" name="email" />
+                <OutlinedInput defaultValue={userData.email} label="Email address" name="email" />
               </FormControl>
             </Grid>
             <Grid md={6} xs={12}>
