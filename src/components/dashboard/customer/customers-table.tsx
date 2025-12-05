@@ -17,10 +17,10 @@ import dayjs from 'dayjs';
 import type { FormikProps } from 'formik';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
+import { date } from 'zod';
 
 import { ConnectLineWithContact } from '@/components/modal/connectLineWithContact';
 import { MainModal } from '@/components/modal/Main';
-import { date } from 'zod';
 
 export interface IinitialValuesAppointmentDate {
   appointmentDate: Dayjs | null;
@@ -28,6 +28,10 @@ export interface IinitialValuesAppointmentDate {
 
 export interface IinitialValuesAppointmentFollowUp {
   appointmentFollowUpDate: Dayjs | null;
+}
+
+export interface IinitialValuesTag {
+  tag: string;
 }
 
 interface CustomersTableProps {
@@ -49,12 +53,13 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
   onRowsPerPageChange,
   refetch,
 }) => {
-  console.log('customer', customer);
   const [modalConnectLineOpen, setModalConectLineOpen] = React.useState(false);
   const [modalAppointmentOpen, setModalAppointmentOpen] = React.useState(false);
   const [modalAppointmentFollowUpOpen, setModalAppointmentFollowUpOpen] = React.useState(false);
+  const [modalTagOpen, setModalTagOpen] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const [contactId, setContactId] = React.useState<string | null>(null);
+  const [contactName, setContactName] = React.useState<string | null>(null);
 
   const handleOpenConnectLineModal = (id: string) => {
     setContactId(id);
@@ -62,6 +67,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
   };
   const handleOpenAppointment = () => setModalAppointmentOpen(true);
   const handleOpenAppointmentFollowUp = () => setModalAppointmentFollowUpOpen(true);
+  const handleOpenTag = () => setModalTagOpen(true);
   const handleCloseConnectLine = async () => {
     setModalConectLineOpen(false);
     setTimeout(() => {
@@ -75,6 +81,10 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
   };
   const handleCloseAppointmentFollowUp = async () => {
     setModalAppointmentFollowUpOpen(false);
+    await refetch();
+  };
+  const handleCloseTag = async () => {
+    setModalTagOpen(false);
     await refetch();
   };
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -101,6 +111,15 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
     }
   };
 
+  const updateTag = async (data: any, callback: any) => {
+    try {
+      await api.patch(`/contact/add/tag/${contactId}`, data);
+      if (callback) callback();
+    } catch (error) {
+      alert('เกิดข้อผิดพลาดในการบันทึก tag');
+    }
+  };
+
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   const getGenderDisplay = (gender: string | null): string => {
@@ -110,10 +129,10 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
   };
 
   const forFirstDate = (dates: Date[] | undefined): string => {
-    if(!dates) return '-';
-    if(dates && dates.length === 0) return '-';
+    if (!dates) return '-';
+    if (dates && dates.length === 0) return '-';
     if (!dayjs(dates[0]).isValid()) return '-';
-    
+
     return dayjs(dates[0]).format('DD/MM/YYYY');
   };
 
@@ -131,6 +150,9 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
         </Button>
         <Button color="info" variant="outlined" onClick={handleOpenAppointmentFollowUp}>
           กรอกวันที่นัดหมายครบตามกำหนด
+        </Button>
+        <Button color="info" variant="outlined" onClick={handleOpenTag}>
+          เพิ่ม Tag ลูกค้า
         </Button>
         <Button color="info" variant="outlined" onClick={() => handleOpenConnectLineModal(contactId as string)}>
           บันทึกข้อมูลการเชื่อมต่อ Line
@@ -239,7 +261,56 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
           )}
         </Formik>
       </MainModal>
-      <ConnectLineWithContact open={modalConnectLineOpen} handleClose={handleCloseConnectLine} contactId={contactId} />
+
+      <MainModal open={modalTagOpen} handleClose={handleCloseTag} contactId={contactId}>
+        <Formik<IinitialValuesTag>
+          initialValues={{ tag: '' }}
+          validationSchema={Yup.object({
+            tag: Yup.string().required('กรุณากรอก tag'),
+          })}
+          onSubmit={async (values, { setSubmitting }) => {
+            await sleep(20);
+            updateTag({ tag: values.tag }, () => {
+              handleCloseTag();
+              setSubmitting(false);
+            });
+          }}
+        >
+          {({ isSubmitting, values, handleChange, handleBlur, errors, touched }: FormikProps<IinitialValuesTag>) => (
+            <Form>
+              <Box mb={2}>
+                <Field name="tag">
+                  {({ field }: any) => (
+                    <Box>
+                      <label htmlFor="tag">Tag ลูกค้า</label>
+                      <input
+                        {...field}
+                        id="tag"
+                        type="text"
+                        placeholder="กรอก tag"
+                        style={{
+                          width: '100%',
+                          padding: '10px',
+                          marginTop: '8px',
+                          border: errors.tag && touched.tag ? '1px solid red' : '1px solid #ccc',
+                          borderRadius: '4px',
+                        }}
+                      />
+                      {errors.tag && touched.tag && (
+                        <div style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>{errors.tag}</div>
+                      )}
+                    </Box>
+                  )}
+                </Field>
+              </Box>
+              <Button type="submit" disabled={isSubmitting} variant="contained" color="primary">
+                บันทึก
+              </Button>
+            </Form>
+          )}
+        </Formik>
+      </MainModal>
+      <ConnectLineWithContact open={modalConnectLineOpen} handleClose={handleCloseConnectLine} contactId={contactId} contactName={contactName} />
       <Paper sx={{ width: '100%' }}>
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader aria-label="sticky table">
@@ -251,9 +322,11 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                 <TableCell>เพศ</TableCell>
                 <TableCell>อายุ</TableCell>
                 <TableCell>เบอร์โทร</TableCell>
+                <TableCell>ชื่อไลน์</TableCell>
                 <TableCell>จัดฟัน</TableCell>
                 <TableCell>วันที่นัดหมาย</TableCell>
                 <TableCell>วันที่นัดหมายติดตาม</TableCell>
+                <TableCell>Tag</TableCell>
                 <TableCell>เชื่อมต่อ Line</TableCell>
               </TableRow>
             </TableHead>
@@ -267,6 +340,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                   onClick={(event: React.MouseEvent<HTMLTableRowElement>) => {
                     handleClick(event);
                     setContactId(row._id);
+                    setContactName(row.firstName + ' ' + row.lastName);
                   }}
                 >
                   <TableCell>{row.hnNumber}</TableCell>
@@ -275,9 +349,11 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                   <TableCell>{getGenderDisplay(row.gender)}</TableCell>
                   <TableCell>{row.age}</TableCell>
                   <TableCell>{row.phone}</TableCell>
+                  <TableCell>{row.lineProfileId && typeof row.lineProfileId === 'object' ? row.lineProfileId.displayName : '-'}</TableCell>
                   <TableCell>{row.isOrthodontics ? 'ใช่' : 'ไม่'}</TableCell>
                   <TableCell>{forFirstDate(row.appointmentDate)}</TableCell>
                   <TableCell>{forFirstDate(row.appointmentFollowUp)}</TableCell>
+                  <TableCell>{row.tag && row.tag.length > 0 ? `[${row.tag.join(', ')}]` : '-'}</TableCell>
                   <TableCell>{row.isConnectLine ? <Link /> : <LinkOff />}</TableCell>
                 </TableRow>
               ))}
