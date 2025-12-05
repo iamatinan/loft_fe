@@ -49,7 +49,6 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string) {
     setLoading(true);
     setError(null);
     try {
-      console.log(' fet customers');
       const response: MetaCustomerData = await api.get('/contact', {
         params: {
           limit: rowsPerPage,
@@ -59,7 +58,6 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string) {
         },
       });
       // Interceptor ใน api.ts จะแปลง response.data.data -> response.data แล้ว
-      console.log('customer res', response);
       setData(response);
     } catch (err) {
       setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
@@ -80,13 +78,13 @@ export default function Page(): React.JSX.Element {
     new Promise((r) => {
       setTimeout(r, ms);
     });
-  const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalOpenAddCustomer, setModalOpenAddCustomer] = React.useState(false);
   const [modalAppointmentOpen, setModalAppointmentOpen] = React.useState(false);
   const handleCloseAppointment = (): void => {
     setModalAppointmentOpen(false);
   };
-  const handleClose = (): void => {
-    setModalOpen(false);
+  const handleCloseAddCustomer = (): void => {
+    setModalOpenAddCustomer(false);
   };
   const postStaff = async (data: any, callback: any) => {
     try {
@@ -100,7 +98,6 @@ export default function Page(): React.JSX.Element {
 
   const postAppointment = async (data: any, callback: any) => {
     try {
-      console.log('data', data);
       await api.patch('/contact/add-appointment', data);
       if (callback) callback();
       // getContact(); // Refresh staff list after adding new item
@@ -132,7 +129,6 @@ export default function Page(): React.JSX.Element {
 
   // Handler สำหรับเปลี่ยนหน้า/จำนวนแถว
   const handleChangePage = (_: unknown, newPage: number) => {
-    console.log('first handleChangePage', newPage);
     setPage(newPage);
   };
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,26 +140,24 @@ export default function Page(): React.JSX.Element {
     setPage(0);
   };
 
-  console.log('at fist customer', customerData);
-
   return (
     <Stack spacing={3}>
       <Stack direction="row" spacing={3}>
         <Stack spacing={1} sx={{ flex: '1 1 auto' }}>
           <Typography variant="h4">รายชื่อลูกค้า</Typography>
-          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          {/* <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
             <Button color="inherit" startIcon={<UploadIcon fontSize="var(--icon-fontSize-md)" />}>
               Import
             </Button>
             <Button color="inherit" startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}>
               Export
             </Button>
-          </Stack>
+          </Stack> */}
         </Stack>
         <div>
           <Button
             onClick={() => {
-              setModalOpen(true);
+                setModalOpenAddCustomer(true);
             }}
             startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
             variant="contained"
@@ -183,7 +177,7 @@ export default function Page(): React.JSX.Element {
           </Button>
         </div>
 
-        <AddCustomerModal open={modalOpen} handleClose={handleClose} title="บันทึกข้อมูลพนักงาน">
+        <AddCustomerModal open={modalOpenAddCustomer} handleClose={handleCloseAddCustomer} title="บันทึกข้อมูลพนักงาน">
           <Formik
             initialValues={{
               firstName: '',
@@ -216,7 +210,7 @@ export default function Page(): React.JSX.Element {
 
               await sleep(20);
               postStaff(valuesToSubmit, () => {
-                handleClose();
+                handleCloseAddCustomer();
                 setSubmitting(false);
               });
             }}

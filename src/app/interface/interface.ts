@@ -49,9 +49,10 @@ export interface CustomerInterface {
     age: number;
     phone: string;
     isConnectLine: boolean;
-    lineProfileId: string | null;
+    lineProfileId: string | LineProfileInterface | null;
     appointmentDate: Date[];
     appointmentFollowUp: Date[];
+    tag: string[];
     deleted: boolean;
     createdAt: string;
     updatedAt: string;

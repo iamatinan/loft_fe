@@ -18,12 +18,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call -- Allow unsafe calls for flexibility with third-party libraries and dynamic form handling */
 /* eslint-disable @typescript-eslint/no-explicit-any -- Allow usage of 'any' type for flexibility in form handling and third-party integrations */
 'use client';
-import api from "@/utils/api";
-import { Box, Button, Card, CardActions, CardContent, Modal, Typography } from "@mui/material";
-import React from "react";
-import { CustomersFilters } from "../dashboard/customer/customers-filters";
-import { LineFilters } from "./lineFilter/lineFilter";
-import { MetaLineProfileData } from "@/app/interface/interface";
+
+import React from 'react';
+import { MetaLineProfileData } from '@/app/interface/interface';
+import api from '@/utils/api';
+import { Box, Button, Card, CardActions, CardContent, Modal, Typography } from '@mui/material';
+
+import { CustomersFilters } from '../dashboard/customer/customers-filters';
+import { LineFilters } from './lineFilter/lineFilter';
+
 const style = {
   position: 'relative',
   top: '0%',
@@ -33,15 +36,13 @@ const style = {
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
-  p: 4
+  p: 4,
 };
 const listContainerStyle = {
   // maxHeight: 400, // หรือกำหนดตามต้องการ
   overflowY: 'auto',
   // mt: 50,
 };
-
-
 
 function useLine(page: number, rowsPerPage: number, keyword: string) {
   const [lineProfile, setLineProfile] = React.useState<MetaLineProfileData>();
@@ -52,13 +53,13 @@ function useLine(page: number, rowsPerPage: number, keyword: string) {
     setLoading(true);
     setError(null);
     try {
-      const resLineProfile :MetaLineProfileData= await api.get(`/line`, {
+      const resLineProfile: MetaLineProfileData = await api.get(`/line`, {
         params: {
           limit: rowsPerPage,
           page: page + 1,
           showDataAll: false,
-          ...(keyword ? { keyword } : {})
-        }
+          ...(keyword ? { keyword } : {}),
+        },
       });
       setLineProfile(resLineProfile);
     } catch (err) {
@@ -75,13 +76,12 @@ function useLine(page: number, rowsPerPage: number, keyword: string) {
   return { lineProfile, loading, error, refetch: fetchCustomers };
 }
 
-
-export function ConnectLineWithContact({ open, handleClose, contactId }: any): React.JSX.Element {
+export function ConnectLineWithContact({ open, handleClose, contactId, contactName }: any): React.JSX.Element {
   const [contactData, setContactData] = React.useState<any>(null);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [keyword, setKeyword] = React.useState('');
-  console.log('keyword', keyword);
+  const [isLoadingContact, setIsLoadingContact] = React.useState(false);
   const { lineProfile, loading, error, refetch } = useLine(page, rowsPerPage, keyword);
 
   const connectLineWithContactz = async (contactIds: string, lineProfileId: string) => {
@@ -97,7 +97,7 @@ export function ConnectLineWithContact({ open, handleClose, contactId }: any): R
     } catch (error) {
       console.error('Error connecting line with contact:', error);
     }
-  }
+  };
 
   const handleCancelConnect = async (contactIds: string, lineProfileId: string) => {
     try {
@@ -113,22 +113,32 @@ export function ConnectLineWithContact({ open, handleClose, contactId }: any): R
     } catch (error) {
       console.error('Error canceling connect line with contact:', error);
     }
-  }
+  };
 
   const getContactById = async () => {
     try {
-      // const resLineProfile = await api.get(`line`);
+      setIsLoadingContact(true);
+      console.log('Fetching contact with ID:', contactId);
       const response = await api.get(`/contact/${contactId}`);
-      if (!response.data) {
-        throw new Error('Network response was not ok');
+      console.log('Contact response:', response.data);
+      
+      // Check if response has data
+      if (response.data?.data) {
+        setContactData(response.data.data);
+      } else if (response.data) {
+        // In case API returns data directly without nesting
+        setContactData(response.data);
+      } else {
+        console.error('No contact data found in response');
+        setContactData(null);
       }
-      setContactData(response.data.data);
-
     } catch (error) {
       console.error('Error fetching contact data:', error);
-      // Handle the error appropriately, e.g., show a notification or alert
+      setContactData(null);
+    } finally {
+      setIsLoadingContact(false);
     }
-  }
+  };
 
   React.useEffect(() => {
     if (open && contactId) {
@@ -144,64 +154,82 @@ export function ConnectLineWithContact({ open, handleClose, contactId }: any): R
   console.log('contactDataxx', contactData);
   console.log('line profile', lineProfile);
   return (
-    <Modal sx={listContainerStyle} open={open} onClose={handleClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
+    <Modal
+      sx={listContainerStyle}
+      open={open}
+      onClose={handleClose}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+    >
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
-          {"กำลังเชื่อมต่อ Line กับลูกค้า: "}
-          {contactData ? `${contactData.name}` : 'Loading...'}
-
-
+          {'กำลังเชื่อมต่อ Line กับลูกค้า: '}
+          {isLoadingContact ? 'กำลังโหลด...' : contactData ? contactData.firstName + ' ' + contactData.lastName : 'ไม่พบข้อมูล'}
         </Typography>
-        <>กำลังเชื่อมกับ {contactData?.lineProfileId?.displayName}</>
+        {contactData?.lineProfileId?.displayName && (
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            กำลังเชื่อมกับ {contactData.lineProfileId.displayName}
+          </Typography>
+        )}
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
           {/* {children} */}
-          <LineFilters
-            keyword={keyword}
-            onKeywordChange={handleKeywordChange}
-          />
-          {
-            (lineProfile?.data.length ?? 0) > 0 ? (
-              <>
-                {lineProfile?.data.map((item: any, index) => (
-                  <Card sx={{ maxWidth: 345 }}
-                    key={item._id}>
-                    <img src={item.picPath} alt="Profile" style={{ width: '100px', height: '100px' }} />
-                    <CardContent>
-                      <Typography gutterBottom variant="h5" component="div">
-                        {item.displayName}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        สถานะ: {item.statusMessage}
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        เชื่อมต่อกับผู้ติดต่อ: {item.contactId ? item.contactId?.firstName  + ' ' + item.contactId?.lastName : 'ยังไม่ระบุ'}
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      {item.contactId ? (<><Button disabled={true} size="small" onClick={
-                        () => {
-                          connectLineWithContactz(contactId, item._id);
-                          handleClose();
-                        }
-                      }>เชื่อมต่อ</Button>
-                        <Button size="small" onClick={
-                          () => {
-                            handleCancelConnect(contactId, item._id);
-                            handleClose();
-                          }
-                        }>ยกเลิกการเชื่อมต่อ</Button></>) : (<Button size="small" onClick={
-                          () => {
+          <LineFilters keyword={keyword} onKeywordChange={handleKeywordChange} />
+          {(lineProfile?.data.length ?? 0) > 0 ? (
+            <>
+              {lineProfile?.data.map((item: any, index) => (
+                <Card sx={{ maxWidth: 345 }} key={item._id}>
+                  <img src={item.picPath} alt="Profile" style={{ width: '100px', height: '100px' }} />
+                  <CardContent>
+                    <Typography gutterBottom variant="h5" component="div">
+                      {item.displayName}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      สถานะ: {item.statusMessage}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      เชื่อมต่อกับผู้ติดต่อ:{' '}
+                      {item.contactId ? item.contactId?.firstName + ' ' + item.contactId?.lastName : 'ยังไม่ระบุ'}
+                    </Typography>
+                  </CardContent>
+                  <CardActions>
+                    {item.contactId ? (
+                      <>
+                        <Button
+                          disabled={true}
+                          size="small"
+                          onClick={() => {
                             connectLineWithContactz(contactId, item._id);
                             handleClose();
-                          }
-                        }>เชื่อมต่อ</Button>)}
-
-                    </CardActions>
-                  </Card>
-                ))}
-              </>
-            ) : null
-          }
+                          }}
+                        >
+                          เชื่อมต่อ
+                        </Button>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            handleCancelConnect(contactId, item._id);
+                            handleClose();
+                          }}
+                        >
+                          ยกเลิกการเชื่อมต่อ
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          connectLineWithContactz(contactId, item._id);
+                          handleClose();
+                        }}
+                      >
+                        เชื่อมต่อ
+                      </Button>
+                    )}
+                  </CardActions>
+                </Card>
+              ))}
+            </>
+          ) : null}
         </Typography>
         <Button onClick={handleClose} variant="contained" color="primary" sx={{ mt: 2 }}>
           Close
