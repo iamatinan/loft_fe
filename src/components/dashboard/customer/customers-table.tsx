@@ -158,6 +158,15 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
     }
   };
 
+  const removeTag = async (customerId: string, tagId: string) => {
+    try {
+      await api.delete(`/contact/remove/tag/${customerId}/${tagId}`);
+      refetch();
+    } catch (error) {
+      alert('เกิดข้อผิดพลาดในการลบ tag');
+    }
+  };
+
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   const getGenderDisplay = (gender: string | null): string => {
@@ -186,6 +195,12 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
               size="small"
               color="primary"
               variant="outlined"
+              onDelete={(e) => {
+                e.stopPropagation();
+                if (confirm(`ต้องการลบ tag "${tag.name}" ออกจากลูกค้านี้หรือไม่?`)) {
+                  void removeTag(row._id, tag._id);
+                }
+              }}
             />
           ))}
         </Stack>
