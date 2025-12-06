@@ -36,6 +36,11 @@ export interface MetaLineProfileData {
     meta: Meta;
 }
 
+export interface TagReference {
+    _id: string;
+    name: string;
+}
+
 export interface CustomerInterface {
     _id: string;
     hnNumber: string;
@@ -52,7 +57,8 @@ export interface CustomerInterface {
     lineProfileId: string | LineProfileInterface | null;
     appointmentDate: Date[];
     appointmentFollowUp: Date[];
-    tag: string[];
+    tag: string[] | null;
+    tagIds?: TagReference[];
     deleted: boolean;
     createdAt: string;
     updatedAt: string;

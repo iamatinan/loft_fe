@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { CustomerInterface } from '@/app/interface/interface';
+import type { CustomerInterface } from '@/app/interface/interface';
 import api from '@/utils/api';
 import { Link, LinkOff } from '@mui/icons-material';
-import { Box, Button, Card, Popover } from '@mui/material';
+import { Box, Button, Card, Popover, MenuItem, Select, FormControl, InputLabel, FormHelperText, Chip, Stack } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -31,7 +31,24 @@ export interface IinitialValuesAppointmentFollowUp {
 }
 
 export interface IinitialValuesTag {
-  tag: string;
+  tagId: string;
+}
+
+interface Tag {
+  _id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+}
+
+interface MetaTagData {
+  data: Tag[];
+  meta: {
+    count: number;
+    page: number;
+    limit: number;
+    pageCount: number;
+  };
 }
 
 interface CustomersTableProps {
@@ -60,6 +77,27 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const [contactId, setContactId] = React.useState<string | null>(null);
   const [contactName, setContactName] = React.useState<string | null>(null);
+  const [tags, setTags] = React.useState<Tag[]>([]);
+  const [tagsLoading, setTagsLoading] = React.useState(false);
+
+  // Fetch tags from master tag API
+  React.useEffect(() => {
+    const fetchTags = async () => {
+      setTagsLoading(true);
+      try {
+        const response: MetaTagData = await api.get('/master/tag', {
+          params: { page: 1, limit: 100 },
+        });
+        // setTags(response.data.filter((tag) => tag.isActive));
+        setTags(response.data);
+      } catch (err) {
+        console.error('Failed to fetch tags', err);
+      } finally {
+        setTagsLoading(false);
+      }
+    };
+    void fetchTags();
+  }, []);
 
   const handleOpenConnectLineModal = (id: string) => {
     setContactId(id);
@@ -134,6 +172,42 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
     if (!dayjs(dates[0]).isValid()) return '-';
 
     return dayjs(dates[0]).format('DD/MM/YYYY');
+  };
+
+  const renderTags = (row: CustomerInterface): React.JSX.Element => {
+    // ใช้ tagIds ก่อนถ้ามี (โครงสร้างใหม่)
+    if (row.tagIds && Array.isArray(row.tagIds) && row.tagIds.length > 0) {
+      return (
+        <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
+          {(row.tagIds as { _id: string; name: string }[]).map((tag) => (
+            <Chip
+              key={tag._id}
+              label={tag.name}
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
+          ))}
+        </Stack>
+      );
+    }
+    // fallback ไปที่ tag แบบเก่า
+    if (row.tag && Array.isArray(row.tag) && row.tag.length > 0) {
+      return (
+        <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
+          {row.tag.map((tagName, index) => (
+            <Chip
+              key={index}
+              label={tagName}
+              size="small"
+              color="primary"
+              variant="outlined"
+            />
+          ))}
+        </Stack>
+      );
+    }
+    return <>-</>;
   };
 
   return (
@@ -264,42 +338,47 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
 
       <MainModal open={modalTagOpen} handleClose={handleCloseTag} contactId={contactId}>
         <Formik<IinitialValuesTag>
-          initialValues={{ tag: '' }}
+          initialValues={{ tagId: '' }}
           validationSchema={Yup.object({
-            tag: Yup.string().required('กรุณากรอก tag'),
+            tagId: Yup.string().required('กรุณาเลือก tag'),
           })}
           onSubmit={async (values, { setSubmitting }) => {
             await sleep(20);
-            updateTag({ tag: values.tag }, () => {
+            updateTag({ tagId: values.tagId }, () => {
               handleCloseTag();
               setSubmitting(false);
             });
           }}
         >
-          {({ isSubmitting, values, handleChange, handleBlur, errors, touched }: FormikProps<IinitialValuesTag>) => (
+          {({ isSubmitting, values, setFieldValue, errors, touched }: FormikProps<IinitialValuesTag>) => (
             <Form>
               <Box mb={2}>
-                <Field name="tag">
+                <Field name="tagId">
                   {({ field }: any) => (
-                    <Box>
-                      <label htmlFor="tag">Tag ลูกค้า</label>
-                      <input
+                    <FormControl fullWidth error={Boolean(errors.tagId && touched.tagId)}>
+                      <InputLabel id="tag-select-label">Tag ลูกค้า</InputLabel>
+                      <Select
                         {...field}
-                        id="tag"
-                        type="text"
-                        placeholder="กรอก tag"
-                        style={{
-                          width: '100%',
-                          padding: '10px',
-                          marginTop: '8px',
-                          border: errors.tag && touched.tag ? '1px solid red' : '1px solid #ccc',
-                          borderRadius: '4px',
-                        }}
-                      />
-                      {errors.tag && touched.tag && (
-                        <div style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>{errors.tag}</div>
+                        labelId="tag-select-label"
+                        id="tag-select"
+                        label="Tag ลูกค้า"
+                        value={values.tagId}
+                        onChange={(e) => setFieldValue('tagId', e.target.value)}
+                        disabled={tagsLoading}
+                      >
+                        <MenuItem value="">
+                          <em>-- เลือก Tag --</em>
+                        </MenuItem>
+                        {tags.map((tag) => (
+                          <MenuItem key={tag._id} value={tag._id}>
+                            {tag.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {errors.tagId && touched.tagId && (
+                        <FormHelperText>{errors.tagId}</FormHelperText>
                       )}
-                    </Box>
+                    </FormControl>
                   )}
                 </Field>
               </Box>
@@ -353,7 +432,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                   <TableCell>{row.isOrthodontics ? 'ใช่' : 'ไม่'}</TableCell>
                   <TableCell>{forFirstDate(row.appointmentDate)}</TableCell>
                   <TableCell>{forFirstDate(row.appointmentFollowUp)}</TableCell>
-                  <TableCell>{row.tag && row.tag.length > 0 ? `[${row.tag.join(', ')}]` : '-'}</TableCell>
+                  <TableCell>{renderTags(row)}</TableCell>
                   <TableCell>{row.isConnectLine ? <Link /> : <LinkOff />}</TableCell>
                 </TableRow>
               ))}
