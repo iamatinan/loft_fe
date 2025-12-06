@@ -9,6 +9,7 @@ export const paths = {
     settings: '/dashboard/settings',
     inventory: '/dashboard/inventory',
     staft: '/dashboard/staft',
+    tags: '/dashboard/tags',
   },
   errors: { notFound: '/errors/not-found' },
 } as const;
