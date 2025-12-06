@@ -4,6 +4,7 @@ import type { Viewport } from 'next';
 import '@/styles/global.css';
 
 import { UserProvider } from '@/contexts/user-context';
+import { SnackbarProvider } from '@/contexts/snackbar-context';
 import { LocalizationProvider } from '@/components/core/localization-provider';
 import { ThemeProvider } from '@/components/core/theme-provider/theme-provider';
 
@@ -19,7 +20,9 @@ export default function Layout({ children }: LayoutProps): React.JSX.Element {
       <body>
         <LocalizationProvider>
           <UserProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <SnackbarProvider>
+              <ThemeProvider>{children}</ThemeProvider>
+            </SnackbarProvider>
           </UserProvider>
         </LocalizationProvider>
       </body>

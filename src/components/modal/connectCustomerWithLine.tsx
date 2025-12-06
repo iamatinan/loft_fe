@@ -21,6 +21,7 @@
 
 import React from 'react';
 import api from '@/utils/api';
+import { useSnackbar } from '@/contexts/snackbar-context';
 import { Box, Button, Card, CardActions, CardContent, CardMedia, Modal, TextField, Typography } from '@mui/material';
 
 const style = {
@@ -108,6 +109,7 @@ export function ConnectCustomerWithLine({
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [keyword, setKeyword] = React.useState('');
+  const { showSnackbar } = useSnackbar();
 
   const { customers, loading, error, refetch } = useCustomers(page, rowsPerPage, keyword);
 
@@ -116,12 +118,15 @@ export function ConnectCustomerWithLine({
       const response = await api.patch(`/contact/connect-line/${contactId}`, { lineProfileId: lineId });
       if (response.status === 200) {
         refetch();
+        showSnackbar('เชื่อมต่อสำเร็จ', 'success');
         // sendDataToParent(true)
       } else {
         console.error('Failed to connect line with contact:', response.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting line with contact:', error);
+      const errorMessage = error?.response?.data?.meta?.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+      showSnackbar(errorMessage, 'error');
     }
   };
 
@@ -131,12 +136,15 @@ export function ConnectCustomerWithLine({
       const response = await api.patch(`/contact/cancel-connect-line/${contactId}`, { lineProfileId: lineId });
       refetch();
       if (response.status === 200) {
+        showSnackbar('ยกเลิกการเชื่อมต่อสำเร็จ', 'success');
         // sendDataToParent(true)
       } else {
         console.error('Failed to cancel connect line with contact:', response.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error canceling connect line with contact:', error);
+      const errorMessage = error?.response?.data?.meta?.message || 'เกิดข้อผิดพลาดในการยกเลิกการเชื่อมต่อ';
+      showSnackbar(errorMessage, 'error');
     }
   };
 
