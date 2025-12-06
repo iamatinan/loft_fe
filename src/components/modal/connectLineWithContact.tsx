@@ -24,6 +24,8 @@ import { MetaLineProfileData } from '@/app/interface/interface';
 import api from '@/utils/api';
 import { Box, Button, Card, CardActions, CardContent, Modal, Typography } from '@mui/material';
 
+import { useSnackbar } from '@/contexts/snackbar-context';
+
 import { CustomersFilters } from '../dashboard/customer/customers-filters';
 import { LineFilters } from './lineFilter/lineFilter';
 
@@ -82,6 +84,7 @@ export function ConnectLineWithContact({ open, handleClose, contactId, contactNa
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [keyword, setKeyword] = React.useState('');
   const [isLoadingContact, setIsLoadingContact] = React.useState(false);
+  const { showSnackbar } = useSnackbar();
   const { lineProfile, loading, error, refetch } = useLine(page, rowsPerPage, keyword);
 
   const connectLineWithContactz = async (contactIds: string, lineProfileId: string) => {
@@ -89,13 +92,16 @@ export function ConnectLineWithContact({ open, handleClose, contactId, contactNa
       const response = await api.patch(`/contact/connect-line/${contactIds}`, { lineProfileId });
       if (response.status === 200) {
         refetch();
+        showSnackbar('เชื่อมต่อสำเร็จ', 'success');
         // sendDataToParent(true)
-        // You can add additional logic here, like updating the UI or showing a success message
       } else {
         console.error('Failed to connect line with contact:', response.data);
+        showSnackbar('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error connecting line with contact:', error);
+      const errorMessage = error?.response?.data?.meta?.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ';
+      showSnackbar(errorMessage, 'error');
     }
   };
 
@@ -105,13 +111,16 @@ export function ConnectLineWithContact({ open, handleClose, contactId, contactNa
       const response = await api.patch(`/contact/cancel-connect-line/${contactIds}`, { lineProfileId });
       refetch();
       if (response.status === 200) {
+        showSnackbar('ยกเลิกการเชื่อมต่อสำเร็จ', 'success');
         // sendDataToParent(true)
-        // You can add additional logic here, like updating the UI or showing a success message
       } else {
         console.error('Failed to cancel connect line with contact:', response.data);
+        showSnackbar('เกิดข้อผิดพลาดในการยกเลิกการเชื่อมต่อ', 'error');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error canceling connect line with contact:', error);
+      const errorMessage = error?.response?.data?.meta?.message || 'เกิดข้อผิดพลาดในการยกเลิกการเชื่อมต่อ';
+      showSnackbar(errorMessage, 'error');
     }
   };
 
@@ -121,7 +130,7 @@ export function ConnectLineWithContact({ open, handleClose, contactId, contactNa
       console.log('Fetching contact with ID:', contactId);
       const response = await api.get(`/contact/${contactId}`);
       console.log('Contact response:', response.data);
-      
+
       // Check if response has data
       if (response.data?.data) {
         setContactData(response.data.data);
@@ -164,7 +173,11 @@ export function ConnectLineWithContact({ open, handleClose, contactId, contactNa
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
           {'กำลังเชื่อมต่อ Line กับลูกค้า: '}
-          {isLoadingContact ? 'กำลังโหลด...' : contactData ? contactData.firstName + ' ' + contactData.lastName : 'ไม่พบข้อมูล'}
+          {isLoadingContact
+            ? 'กำลังโหลด...'
+            : contactData
+              ? contactData.firstName + ' ' + contactData.lastName
+              : 'ไม่พบข้อมูล'}
         </Typography>
         {contactData?.lineProfileId?.displayName && (
           <Typography variant="body2" sx={{ mt: 1 }}>
