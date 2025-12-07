@@ -95,10 +95,10 @@ export default function Page(): React.JSX.Element {
       {/* Loading & Error */}
       {loading && <Box display="flex" justifyContent="center" my={2}><CircularProgress /></Box>}
       {error && <Box color="error.main">{error}</Box>}
-      <CustomersFilters
+      {/* <CustomersFilters
         keyword={keyword}
         onKeywordChange={handleKeywordChange}
-      />
+      /> */}
       <ListLineTable
         lineData={lineData}
         page={page}
