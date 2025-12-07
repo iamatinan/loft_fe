@@ -4,7 +4,6 @@ import type { Metadata } from 'next';
 import * as React from 'react';
 
 import type { Patient } from '@/components/dashboard/overview/patients-by-tag';
-import { PatientsByTag } from '@/components/dashboard/overview/patients-by-tag';
 import { TodayMessages } from '@/components/dashboard/overview/today-messages';
 import { TotalCustomers } from '@/components/dashboard/overview/total-customers';
 import { config } from '@/config';
@@ -89,7 +88,7 @@ export default function Page(): React.JSX.Element {
 
       {/* Patient statistics by tag */}
       <Grid lg={12} xs={12}>
-        <PatientsByTag patients={mockPatients} sx={{ height: '100%' }} />
+        {/* <PatientsByTag patients={mockPatients} sx={{ height: '100%' }} /> */}
       </Grid>
 
       {/* <Grid lg={8} xs={12}>

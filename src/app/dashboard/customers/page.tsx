@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import type { IinitialValuesCreateCustomer, MetaCustomerData } from '@/app/interface/interface';
 import api from '@/utils/api';
 import { Box, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
@@ -9,11 +8,10 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
-import { Upload as UploadIcon } from '@phosphor-icons/react/dist/ssr/Upload';
 import type { FieldProps } from 'formik';
 import { Field, Form, Formik } from 'formik';
+import * as React from 'react';
 import * as Yup from 'yup';
 
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
@@ -40,7 +38,7 @@ function FormikTextField(props: FieldProps & { label?: string; fullWidth?: boole
 }
 
 // ย้าย useCustomers จาก customers-table มาไว้ที่นี่
-function useCustomers(page: number, rowsPerPage: number, keyword: string) {
+function useCustomers(page: number, rowsPerPage: number, keyword: string, tagId: string) {
   const [data, setData] = React.useState<MetaCustomerData>();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -55,6 +53,7 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string) {
           page: page + 1,
           showDataAll: false,
           ...(keyword ? { keyword } : {}),
+          ...(tagId ? { tagId } : {}),
         },
       });
       // Interceptor ใน api.ts จะแปลง response.data.data -> response.data แล้ว
@@ -64,13 +63,54 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string) {
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, keyword]);
+  }, [page, rowsPerPage, keyword, tagId]);
 
   React.useEffect(() => {
     void fetchCustomers();
   }, [fetchCustomers]);
 
   return { data, loading, error, refetch: fetchCustomers };
+}
+
+interface Tag {
+  _id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+}
+
+interface MetaTagData {
+  data: Tag[];
+  meta: {
+    count: number;
+    page: number;
+    limit: number;
+    pageCount: number;
+  };
+}
+
+function useTags() {
+  const [data, setData] = React.useState<Tag[]>([]);
+  const [loading, setLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchTags = async () => {
+      setLoading(true);
+      try {
+        const response: MetaTagData = await api.get('/master/tag', {
+          params: { page: 1, limit: 100 },
+        });
+        setData(response.data);
+      } catch (err) {
+        console.error('Failed to fetch tags', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void fetchTags();
+  }, []);
+
+  return { tags: data, loading };
 }
 
 export default function Page(): React.JSX.Element {
@@ -125,7 +165,9 @@ export default function Page(): React.JSX.Element {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [keyword, setKeyword] = React.useState('');
-  const { data: customerData, loading, error, refetch } = useCustomers(page, rowsPerPage, keyword);
+  const [tagId, setTagId] = React.useState('');
+  const { data: customerData, loading, error, refetch } = useCustomers(page, rowsPerPage, keyword, tagId);
+  const { tags } = useTags();
 
   // Handler สำหรับเปลี่ยนหน้า/จำนวนแถว
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -137,6 +179,10 @@ export default function Page(): React.JSX.Element {
   };
   const handleKeywordChange = (value: string) => {
     setKeyword(value);
+    setPage(0);
+  };
+  const handleTagChange = (value: string) => {
+    setTagId(value);
     setPage(0);
   };
 
@@ -157,7 +203,7 @@ export default function Page(): React.JSX.Element {
         <div>
           <Button
             onClick={() => {
-                setModalOpenAddCustomer(true);
+              setModalOpenAddCustomer(true);
             }}
             startIcon={<PlusIcon fontSize="var(--icon-fontSize-md)" />}
             variant="contained"
@@ -346,7 +392,13 @@ export default function Page(): React.JSX.Element {
         </Box>
       )}
       {error && <Box color="error.main">{error}</Box>}
-      <CustomersFilters keyword={keyword} onKeywordChange={handleKeywordChange} />
+      <CustomersFilters
+        keyword={keyword}
+        onKeywordChange={handleKeywordChange}
+        tagId={tagId}
+        onTagChange={handleTagChange}
+        tags={tags}
+      />
       <CustomersTable
         customer={customerData?.data}
         page={page}
