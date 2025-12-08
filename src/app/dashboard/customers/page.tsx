@@ -38,7 +38,14 @@ function FormikTextField(props: FieldProps & { label?: string; fullWidth?: boole
 }
 
 // ย้าย useCustomers จาก customers-table มาไว้ที่นี่
-function useCustomers(page: number, rowsPerPage: number, keyword: string, tagId: string) {
+function useCustomers(
+  page: number,
+  rowsPerPage: number,
+  keyword: string,
+  tagId: string,
+  orderBy?: string,
+  orderType?: -1 | 1
+) {
   const [data, setData] = React.useState<MetaCustomerData>();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -54,6 +61,8 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string, tagId:
           showDataAll: false,
           ...(keyword ? { keyword } : {}),
           ...(tagId ? { tagId } : {}),
+          ...(orderBy ? { orderBy } : {}),
+          ...(orderType ? { orderType } : {}),
         },
       });
       // Interceptor ใน api.ts จะแปลง response.data.data -> response.data แล้ว
@@ -63,7 +72,7 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string, tagId:
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, keyword, tagId]);
+  }, [page, rowsPerPage, keyword, tagId, orderBy, orderType]);
 
   React.useEffect(() => {
     void fetchCustomers();
@@ -166,7 +175,9 @@ export default function Page(): React.JSX.Element {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [keyword, setKeyword] = React.useState('');
   const [tagId, setTagId] = React.useState('');
-  const { data: customerData, loading, error, refetch } = useCustomers(page, rowsPerPage, keyword, tagId);
+  const [orderBy, setOrderBy] = React.useState<string>('');
+  const [orderType, setOrderType] = React.useState<-1 | 1>(1);
+  const { data: customerData, loading, error, refetch } = useCustomers(page, rowsPerPage, keyword, tagId, orderBy, orderType);
   const { tags } = useTags();
 
   // Handler สำหรับเปลี่ยนหน้า/จำนวนแถว
@@ -183,6 +194,18 @@ export default function Page(): React.JSX.Element {
   };
   const handleTagChange = (value: string) => {
     setTagId(value);
+    setPage(0);
+  };
+
+  const handleSort = (columnName: string) => {
+    if (orderBy === columnName) {
+      // Toggle sort order if same column
+      setOrderType(orderType === 1 ? -1 : 1);
+    } else {
+      // Set new column and default to ascending
+      setOrderBy(columnName);
+      setOrderType(1);
+    }
     setPage(0);
   };
 
@@ -407,6 +430,9 @@ export default function Page(): React.JSX.Element {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
         refetch={refetch}
+        orderBy={orderBy}
+        orderType={orderType}
+        onSort={handleSort}
       />
     </Stack>
   );

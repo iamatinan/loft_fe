@@ -1,7 +1,7 @@
 import * as React from 'react';
 import type { CustomerInterface } from '@/app/interface/interface';
 import api from '@/utils/api';
-import { Link, LinkOff } from '@mui/icons-material';
+import { Link, LinkOff, ArrowUpward, ArrowDownward } from '@mui/icons-material';
 import { Box, Button, Card, Popover, MenuItem, Select, FormControl, InputLabel, FormHelperText, Chip, Stack } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -59,6 +59,9 @@ interface CustomersTableProps {
   onPageChange: (event: unknown, newPage: number) => void;
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   refetch: () => void;
+  orderBy?: string;
+  orderType?: -1 | 1;
+  onSort: (columnName: string) => void;
 }
 
 const CustomersTable: React.FC<CustomersTableProps> = ({
@@ -69,6 +72,9 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
   onPageChange,
   onRowsPerPageChange,
   refetch,
+  orderBy = '',
+  orderType = 1,
+  onSort,
 }) => {
   const [modalConnectLineOpen, setModalConectLineOpen] = React.useState(false);
   const [modalAppointmentOpen, setModalAppointmentOpen] = React.useState(false);
@@ -410,7 +416,21 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
-                <TableCell>HN Number</TableCell>
+                <TableCell
+                  onClick={() => onSort('hnNumber')}
+                  sx={{
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    '&:hover': { backgroundColor: 'action.hover' },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    HN Number
+                    {orderBy === 'hnNumber' && (
+                      orderType === 1 ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />
+                    )}
+                  </Box>
+                </TableCell>
                 <TableCell>เลขบัตรประชาชน</TableCell>
                 <TableCell>ชื่อ-นามสกุล</TableCell>
                 <TableCell>เพศ</TableCell>
