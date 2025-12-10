@@ -10,6 +10,9 @@ export const paths = {
     inventory: '/dashboard/inventory',
     staft: '/dashboard/staft',
     tags: '/dashboard/tags',
+    reports: {
+      messages: '/dashboard/reports/messages',
+    },
   },
   errors: { notFound: '/errors/not-found' },
 } as const;
