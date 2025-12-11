@@ -1,8 +1,20 @@
 import * as React from 'react';
 import type { CustomerInterface } from '@/app/interface/interface';
 import api from '@/utils/api';
-import { Link, LinkOff, ArrowUpward, ArrowDownward } from '@mui/icons-material';
-import { Box, Button, Card, Popover, MenuItem, Select, FormControl, InputLabel, FormHelperText, Chip, Stack } from '@mui/material';
+import { ArrowDownward, ArrowUpward, Link, LinkOff } from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  Card,
+  Chip,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Popover,
+  Select,
+  Stack,
+} from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -166,7 +178,8 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
 
   const removeTag = async (customerId: string, tagId: string) => {
     try {
-      await api.delete(`/contact/remove/tag/${customerId}/${tagId}`);
+      // tagid  เป็น body ของเส้น patch
+      await api.patch(`/contact/remove/tag/${customerId}`, { tagId });
       refetch();
     } catch (error) {
       alert('เกิดข้อผิดพลาดในการลบ tag');
@@ -217,13 +230,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
       return (
         <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
           {row.tag.map((tagName, index) => (
-            <Chip
-              key={index}
-              label={tagName}
-              size="small"
-              color="primary"
-              variant="outlined"
-            />
+            <Chip key={index} label={tagName} size="small" color="primary" variant="outlined" />
           ))}
         </Stack>
       );
@@ -454,9 +461,7 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                           </MenuItem>
                         ))}
                       </Select>
-                      {errors.tagId && touched.tagId && (
-                        <FormHelperText>{errors.tagId}</FormHelperText>
-                      )}
+                      {errors.tagId && touched.tagId && <FormHelperText>{errors.tagId}</FormHelperText>}
                     </FormControl>
                   )}
                 </Field>
@@ -468,7 +473,12 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
           )}
         </Formik>
       </MainModal>
-      <ConnectLineWithContact open={modalConnectLineOpen} handleClose={handleCloseConnectLine} contactId={contactId} contactName={contactName} />
+      <ConnectLineWithContact
+        open={modalConnectLineOpen}
+        handleClose={handleCloseConnectLine}
+        contactId={contactId}
+        contactName={contactName}
+      />
       <Paper sx={{ width: '100%' }}>
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader aria-label="sticky table">
@@ -484,9 +494,8 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     HN Number
-                    {orderBy === 'hnNumber' && (
-                      orderType === 1 ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />
-                    )}
+                    {orderBy === 'hnNumber' &&
+                      (orderType === 1 ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />)}
                   </Box>
                 </TableCell>
                 <TableCell>เลขบัตรประชาชน</TableCell>
@@ -521,7 +530,9 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                   <TableCell>{getGenderDisplay(row.gender)}</TableCell>
                   <TableCell>{row.age}</TableCell>
                   <TableCell>{row.phone}</TableCell>
-                  <TableCell>{row.lineProfileId && typeof row.lineProfileId === 'object' ? row.lineProfileId.displayName : '-'}</TableCell>
+                  <TableCell>
+                    {row.lineProfileId && typeof row.lineProfileId === 'object' ? row.lineProfileId.displayName : '-'}
+                  </TableCell>
                   <TableCell>{row.isOrthodontics ? 'ใช่' : 'ไม่'}</TableCell>
                   <TableCell>{forFirstDate(row.appointmentDate)}</TableCell>
                   <TableCell>{forFirstDate(row.appointmentFollowUp)}</TableCell>
