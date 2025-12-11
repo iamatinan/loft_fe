@@ -239,19 +239,77 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
         anchorEl={anchorEl}
         onClose={handleClosePopover}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        slotProps={{
+          paper: {
+            sx: {
+              p: 2,
+              mt: 1,
+              minWidth: 280,
+              borderRadius: 2,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+            },
+          },
+        }}
       >
-        <Button color="info" variant="outlined" onClick={handleOpenAppointment}>
-          กรอกวันที่นัดหมาย
-        </Button>
-        <Button color="info" variant="outlined" onClick={handleOpenAppointmentFollowUp}>
-          กรอกวันที่นัดหมายครบตามกำหนด
-        </Button>
-        <Button color="info" variant="outlined" onClick={handleOpenTag}>
-          เพิ่ม Tag ลูกค้า
-        </Button>
-        <Button color="info" variant="outlined" onClick={() => handleOpenConnectLineModal(contactId as string)}>
-          บันทึกข้อมูลการเชื่อมต่อ Line
-        </Button>
+        <Stack spacing={1.5}>
+          <Button
+            fullWidth
+            color="primary"
+            variant="contained"
+            onClick={handleOpenAppointment}
+            sx={{
+              justifyContent: 'flex-start',
+              textTransform: 'none',
+              py: 1.5,
+              px: 2,
+            }}
+          >
+            📅 กรอกวันที่นัดหมาย
+          </Button>
+          <Button
+            fullWidth
+            color="secondary"
+            variant="contained"
+            onClick={handleOpenAppointmentFollowUp}
+            sx={{
+              justifyContent: 'flex-start',
+              textTransform: 'none',
+              py: 1.5,
+              px: 2,
+            }}
+          >
+            🔔 กรอกวันที่นัดหมายครบตามกำหนด
+          </Button>
+          <Button
+            fullWidth
+            color="success"
+            variant="contained"
+            onClick={handleOpenTag}
+            sx={{
+              justifyContent: 'flex-start',
+              textTransform: 'none',
+              py: 1.5,
+              px: 2,
+            }}
+          >
+            🏷️ เพิ่ม Tag ลูกค้า
+          </Button>
+          <Button
+            fullWidth
+            color="info"
+            variant="contained"
+            onClick={() => handleOpenConnectLineModal(contactId as string)}
+            sx={{
+              justifyContent: 'flex-start',
+              textTransform: 'none',
+              py: 1.5,
+              px: 2,
+            }}
+          >
+            💬 บันทึกข้อมูลการเชื่อมต่อ Line
+          </Button>
+        </Stack>
       </Popover>
       <MainModal open={modalAppointmentOpen} handleClose={handleCloseAppointment} contactId={contactId}>
         <Formik<IinitialValuesAppointmentDate>

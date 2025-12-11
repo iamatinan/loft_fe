@@ -1,7 +1,7 @@
 import { LineProfileInterface, MetaLineProfileData } from '@/app/interface/interface';
 import api from '@/utils/api';
 import { Link, LinkOff } from '@mui/icons-material';
-import { Box, Button, Card, Popover } from '@mui/material';
+import { Box, Button, Card, Popover, Stack } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -87,13 +87,49 @@ const ListLineTable: React.FC<CustomersTableProps> = ({
         anchorEl={anchorEl}
         onClose={handleClosePopover}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        slotProps={{
+          paper: {
+            sx: {
+              p: 2,
+              mt: 1,
+              minWidth: 280,
+              borderRadius: 2,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+            },
+          },
+        }}
       >
-        <Button color="info" variant="outlined" onClick={handleOpenAppointment}>
-          กรอกวันที่นัดหมาย
-        </Button>
-        <Button color="info" variant="outlined" onClick={() => handleOpenConnectLineModal(lineProfileId as string)}>
-          เชื่อมต่อ Line กับลูกค้า
-        </Button>
+        <Stack spacing={1.5}>
+          <Button
+            fullWidth
+            color="primary"
+            variant="contained"
+            onClick={handleOpenAppointment}
+            sx={{
+              justifyContent: 'flex-start',
+              textTransform: 'none',
+              py: 1.5,
+              px: 2,
+            }}
+          >
+            📅 กรอกวันที่นัดหมาย
+          </Button>
+          <Button
+            fullWidth
+            color="info"
+            variant="contained"
+            onClick={() => handleOpenConnectLineModal(lineProfileId as string)}
+            sx={{
+              justifyContent: 'flex-start',
+              textTransform: 'none',
+              py: 1.5,
+              px: 2,
+            }}
+          >
+            🔗 เชื่อมต่อ Line กับลูกค้า
+          </Button>
+        </Stack>
       </Popover>
       <MainModal open={modalAppointmentOpen} handleClose={handleCloseAppointment} contactId={contactId}>
         <Formik<IinitialValuesAppointmentDate>
