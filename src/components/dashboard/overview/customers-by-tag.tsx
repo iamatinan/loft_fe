@@ -29,7 +29,7 @@ const tagColors: Record<string, string> = {
 };
 
 const getTagColor = (tagName: string): string => {
-  const lowerTag = tagName.toLowerCase();
+  const lowerTag = tagName?.toLowerCase();
   return tagColors[lowerTag] || '#9E9E9E';
 };
 
