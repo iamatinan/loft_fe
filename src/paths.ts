@@ -12,6 +12,7 @@ export const paths = {
     tags: '/dashboard/tags',
     reports: {
       messages: '/dashboard/reports/messages',
+      customerAppointment: '/dashboard/reports/customer-appointment',
     },
   },
   errors: { notFound: '/errors/not-found' },
