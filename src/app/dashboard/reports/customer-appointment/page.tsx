@@ -124,7 +124,7 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
   const fetchAppointments = React.useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get<AppointmentReportData>('/reports/customer-appointment', {
+      const response = await api.get<any>('/reports/customer-appointment', {
         params: {
           page: page + 1,
           limit: rowsPerPage,
@@ -135,14 +135,13 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
       });
 
       // Handle the response data structure
-      console.log('response' ,response);
-      const responseData = response;
+      console.log('response', response);
+      const responseData = response.data;
       console.log('resPonex,,, ', responseData);
-      const yyy = response as any;
+      const yyy = response.data as any;
       const xxx = yyy?.meta?.count || 0;
-      const appointmentsData = responseData.data || [];
+      const appointmentsData = responseData || [];
       const totalCountData = xxx;
-      // console.log('to');
       console.log('app', appointmentsData);
       console.log('to', totalCountData);
       setAppointments(appointmentsData);
