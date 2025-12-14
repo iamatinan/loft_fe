@@ -37,7 +37,7 @@ export function SideNav(): React.JSX.Element {
         '--SideNav-background': 'var(--mui-palette-neutral-950)',
         '--SideNav-color': 'var(--mui-palette-common-white)',
         '--NavItem-color': 'var(--mui-palette-neutral-300)',
-        '--NavItem-hover-background': 'rgba(255, 255, 255, 0.04)',
+        '--NavItem-hover-background': 'rgba(255, 255, 255, 0.08)',
         '--NavItem-active-background': 'var(--mui-palette-primary-main)',
         '--NavItem-active-color': 'var(--mui-palette-primary-contrastText)',
         '--NavItem-disabled-color': 'var(--mui-palette-neutral-500)',
@@ -59,23 +59,42 @@ export function SideNav(): React.JSX.Element {
         '&::-webkit-scrollbar': { display: 'none' },
       }}
     >
-      <Stack spacing={2} sx={{ p: 3 }}>
+      {/* Logo Section */}
+      <Stack spacing={1.5} sx={{ p: 3, pb: 2 }}>
         <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
-          {/* <Logo color="light" height={32} width={122} /> */}
-          <p style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold' }}>Loft Studio</p>
+          <Typography
+            variant="h6"
+            sx={{
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '1.25rem',
+              letterSpacing: '-0.5px',
+            }}
+          >
+            Loft Studio
+          </Typography>
         </Box>
-        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
-          {/* <Logo color="light" height={32} width={122} /> */}
-          <p style={{ color: 'white', fontSize: '1.5rem', fontWeight: 'bold' }}>ระบบจัดการหลังบ้าน</p>
-        </Box>
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'var(--mui-palette-neutral-400)',
+            fontSize: '0.75rem',
+            fontWeight: 500,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
+          }}
+        >
+          ระบบจัดการหลังบ้าน
+        </Typography>
       </Stack>
 
-
-
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
-      <Box component="nav" sx={{ flex: '1 1 auto', p: '12px' }}>
+
+      {/* Navigation Items */}
+      <Box component="nav" sx={{ flex: '1 1 auto', p: '16px', overflow: 'auto' }}>
         {renderNavItems({ pathname, items: navItems })}
       </Box>
+
       <Divider sx={{ borderColor: 'var(--mui-palette-neutral-700)' }} />
     </Box>
   );
@@ -118,22 +137,45 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
           : { role: 'button' })}
         sx={{
           alignItems: 'center',
-          borderRadius: 1,
+          borderRadius: '8px',
           color: 'var(--NavItem-color)',
           cursor: 'pointer',
           display: 'flex',
           flex: '0 0 auto',
-          gap: 1,
-          p: '6px 16px',
+          gap: 2,
+          p: '10px 16px',
           position: 'relative',
           textDecoration: 'none',
           whiteSpace: 'nowrap',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           ...(disabled && {
             bgcolor: 'var(--NavItem-disabled-background)',
             color: 'var(--NavItem-disabled-color)',
             cursor: 'not-allowed',
           }),
-          ...(active && { bgcolor: 'var(--NavItem-active-background)', color: 'var(--NavItem-active-color)' }),
+          ...(!disabled &&
+            !active && {
+              '&:hover': {
+                bgcolor: 'var(--NavItem-hover-background)',
+                color: 'var(--mui-palette-neutral-100)',
+              },
+            }),
+          ...(active && {
+            bgcolor: 'var(--NavItem-active-background)',
+            color: 'var(--NavItem-active-color)',
+            fontWeight: 600,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              left: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: '3px',
+              height: '24px',
+              bgcolor: 'var(--mui-palette-primary-contrastText)',
+              borderRadius: '0 4px 4px 0',
+            },
+          }),
         }}
       >
         <Box sx={{ alignItems: 'center', display: 'flex', justifyContent: 'center', flex: '0 0 auto' }}>
@@ -148,7 +190,13 @@ function NavItem({ disabled, external, href, icon, matcher, pathname, title }: N
         <Box sx={{ flex: '1 1 auto' }}>
           <Typography
             component="span"
-            sx={{ color: 'inherit', fontSize: '0.875rem', fontWeight: 500, lineHeight: '28px' }}
+            sx={{
+              color: 'inherit',
+              fontSize: '0.875rem',
+              fontWeight: 'inherit',
+              lineHeight: '28px',
+              letterSpacing: '0.25px',
+            }}
           >
             {title}
           </Typography>
