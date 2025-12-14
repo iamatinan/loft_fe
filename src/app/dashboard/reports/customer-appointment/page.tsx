@@ -135,9 +135,11 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
       });
 
       // Handle the response data structure
+      // console.log('response' ,response);
       const responseData = response.data;
       const appointmentsData = responseData || [];
       const totalCountData = response.meta?.count || 0;
+      // console.log('to');
       setAppointments(appointmentsData);
       setTotalCount(totalCountData);
     } catch (error) {
