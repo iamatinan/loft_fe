@@ -138,7 +138,7 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
       console.log('response', response);
       const responseData = response.data;
       console.log('resPonex,,, ', responseData);
-      const yyy = response.data as any;
+      const yyy = response as any;
       const xxx = yyy?.meta?.count || 0;
       const appointmentsData = responseData || [];
       const totalCountData = xxx;
