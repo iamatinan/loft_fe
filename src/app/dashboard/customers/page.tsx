@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import type { IinitialValuesCreateCustomer, MetaCustomerData } from '@/app/interface/interface';
 import api from '@/utils/api';
 import { Box, FormControlLabel, FormLabel, Radio, RadioGroup, TextField } from '@mui/material';
@@ -11,7 +12,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import type { FieldProps } from 'formik';
 import { Field, Form, Formik } from 'formik';
-import * as React from 'react';
 import * as Yup from 'yup';
 
 import { CustomersFilters } from '@/components/dashboard/customer/customers-filters';
@@ -177,7 +177,12 @@ export default function Page(): React.JSX.Element {
   const [tagId, setTagId] = React.useState('');
   const [orderBy, setOrderBy] = React.useState<string>('');
   const [orderType, setOrderType] = React.useState<-1 | 1>(1);
-  const { data: customerData, loading, error, refetch } = useCustomers(page, rowsPerPage, keyword, tagId, orderBy, orderType);
+  const {
+    data: customerData,
+    loading,
+    error,
+    refetch,
+  } = useCustomers(page, rowsPerPage, keyword, tagId, orderBy, orderType);
   const { tags } = useTags();
 
   // Handler สำหรับเปลี่ยนหน้า/จำนวนแถว
@@ -379,13 +384,11 @@ export default function Page(): React.JSX.Element {
             }}
             // validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting }) => {
-              console.log('value >>', values);
               const valuesToSubmit: {
                 data: string;
               } = {
                 data: values.body,
               };
-              console.log('yyyy zvaluesToSubmit', valuesToSubmit);
 
               await sleep(20);
               postAppointment(valuesToSubmit, () => {

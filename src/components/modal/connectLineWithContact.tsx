@@ -107,7 +107,6 @@ export function ConnectLineWithContact({ open, handleClose, contactId, contactNa
 
   const handleCancelConnect = async (contactIds: string, lineProfileId: string) => {
     try {
-      console.log('handelCancelConnect', contactIds, lineProfileId);
       const response = await api.patch(`/contact/cancel-connect-line/${contactIds}`, { lineProfileId });
       refetch();
       if (response.status === 200) {
@@ -127,9 +126,7 @@ export function ConnectLineWithContact({ open, handleClose, contactId, contactNa
   const getContactById = async () => {
     try {
       setIsLoadingContact(true);
-      console.log('Fetching contact with ID:', contactId);
       const response = await api.get(`/contact/${contactId}`);
-      console.log('Contact response:', response.data);
 
       // Check if response has data
       if (response.data?.data) {
@@ -160,8 +157,6 @@ export function ConnectLineWithContact({ open, handleClose, contactId, contactNa
     setPage(0);
   };
 
-  console.log('contactDataxx', contactData);
-  console.log('line profile', lineProfile);
   return (
     <Modal
       sx={listContainerStyle}

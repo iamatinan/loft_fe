@@ -58,7 +58,6 @@ class AuthClient {
       if (!auth || auth.error) {
         return { error: 'Invalid credentials' };
       }
-      console.log('auth', auth);
       // ตรวจสอบ token
       const accessToken = auth?.accessToken?.token;
       const refreshToken = auth?.refreshToken?.token;
@@ -91,12 +90,10 @@ class AuthClient {
       const res = await api.get('/user/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('res', res);
       localStorage.setItem('user-email', res.data.email);
       localStorage.setItem('user-img', res.data.img||'');
 
       if(res.data.firstName && res.data.lastName ){
-        console.log('res.data.', res.data.firstName );
         localStorage.setItem('user-name', res.data.firstName + ' ' + res.data.lastName);
       }
       

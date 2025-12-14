@@ -78,7 +78,6 @@ function useCustomers(page: number, rowsPerPage: number, keyword: string) {
           ...(keyword ? { keyword } : {}),
         },
       });
-      console.log('customers data', resCustomers);
       setCustomers(resCustomers);
     } catch (err) {
       setError('เกิดข้อผิดพลาดในการโหลดข้อมูล');
@@ -172,8 +171,6 @@ export function ConnectCustomerWithLine({
     setPage(0);
   };
 
-  console.log('lineData', lineData);
-  console.log('customers', customers);
 
   return (
     <Modal

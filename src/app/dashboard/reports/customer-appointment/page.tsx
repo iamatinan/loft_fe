@@ -72,7 +72,10 @@ import dayjs, { type Dayjs } from 'dayjs';
 
 interface CustomerAppointment {
   _id: string;
-  customerId: string;
+  customerId: {
+    firstName: string;
+    lastName: string;
+  };
   clinicId: string;
   branchId: string;
   appointmentDate: string;
@@ -280,6 +283,7 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
               <TableHead>
                 <TableRow>
                   <TableCell>วันนัดหมาย</TableCell>
+                  <TableCell>ชื่อ นามสกุล</TableCell>
                   <TableCell>เวลา</TableCell>
                   <TableCell>ประเภท</TableCell>
                   <TableCell>สถานะ</TableCell>
@@ -304,6 +308,9 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
                         <Typography variant="body2">
                           {dayjs(appointment.appointmentDate).format('DD/MM/YYYY')}
                         </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">{appointment.customerId.firstName} {appointment.customerId.lastName}</Typography>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">{dayjs(appointment.appointmentDate).format('HH:mm')}</Typography>

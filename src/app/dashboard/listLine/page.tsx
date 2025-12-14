@@ -74,7 +74,6 @@ export default function Page(): React.JSX.Element {
     setKeyword(value);
     setPage(0);
   };
-  console.log('lineData >> ', lineData);
 
   return (
     <Stack spacing={3}>

@@ -158,7 +158,6 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
 
   const updateAppointmentFollowUp = async (data: any, callback: any) => {
     try {
-      console.log('data', data);
       // สมมติว่า api.patch ถูก import จาก utils/api
       await api.patch(`/contact/add-followUp/${contactId}`, data);
       if (callback) callback();
