@@ -136,8 +136,8 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
 
       // Handle the response data structure
       const responseData = response.data;
-      const appointmentsData = responseData.data || [];
-      const totalCountData = responseData.meta?.count || 0;
+      const appointmentsData = responseData || [];
+      const totalCountData = response.meta?.count || 0;
       setAppointments(appointmentsData);
       setTotalCount(totalCountData);
     } catch (error) {
@@ -310,7 +310,9 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="body2">{appointment.customerId.firstName} {appointment.customerId.lastName}</Typography>
+                        <Typography variant="body2">
+                          {appointment.customerId.firstName} {appointment.customerId.lastName}
+                        </Typography>
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2">{dayjs(appointment.appointmentDate).format('HH:mm')}</Typography>
