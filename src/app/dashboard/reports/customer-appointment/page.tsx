@@ -21,7 +21,9 @@ import {
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Download as DownloadIcon } from '@phosphor-icons/react/dist/ssr/Download';
+import { XCircle as XCircleIcon } from '@phosphor-icons/react/dist/ssr/XCircle';
 import dayjs, { type Dayjs } from 'dayjs';
+import { CancelAppointmentsModal } from '@/components/dashboard/modal/CancelAppointmentsModal';
 
 /*
  * Expected JSON format from backend API:
@@ -120,6 +122,7 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
   const [totalCount, setTotalCount] = React.useState(0);
   const [startDate, setStartDate] = React.useState<Dayjs | null>(dayjs().subtract(7, 'day'));
   const [endDate, setEndDate] = React.useState<Dayjs | null>(dayjs());
+  const [cancelModalOpen, setCancelModalOpen] = React.useState(false);
 
   const fetchAppointments = React.useCallback(async () => {
     try {
@@ -245,13 +248,23 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
     <Stack spacing={3}>
       <Stack direction="row" spacing={3} sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="h4">รายงานการนัดหมายลูกค้า</Typography>
-        <Button
-          startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}
-          variant="contained"
-          onClick={handleExport}
-        >
-          ส่งออกรายงาน
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button
+            startIcon={<XCircleIcon fontSize="var(--icon-fontSize-md)" />}
+            variant="outlined"
+            color="error"
+            onClick={() => { setCancelModalOpen(true); }}
+          >
+            ยกเลิกวันนัดหมาย
+          </Button>
+          <Button
+            startIcon={<DownloadIcon fontSize="var(--icon-fontSize-md)" />}
+            variant="contained"
+            onClick={handleExport}
+          >
+            ส่งออกรายงาน
+          </Button>
+        </Stack>
       </Stack>
 
       <Card>
@@ -404,6 +417,14 @@ export default function CustomerAppointmentReportPage(): React.JSX.Element {
           </Box>
         </Stack>
       </Card>
+
+      <CancelAppointmentsModal
+        open={cancelModalOpen}
+        onClose={() => { setCancelModalOpen(false); }}
+        onSuccess={() => {
+          void fetchAppointments();
+        }}
+      />
     </Stack>
   );
 }
