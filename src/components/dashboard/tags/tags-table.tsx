@@ -9,6 +9,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
+import { PencilSimple as PencilSimpleIcon } from '@phosphor-icons/react/dist/ssr/PencilSimple';
 import { Trash as TrashIcon } from '@phosphor-icons/react/dist/ssr/Trash';
 
 interface Tag {
@@ -28,6 +29,7 @@ interface TagsTableProps {
   onPageChange: (event: unknown, newPage: number) => void;
   onRowsPerPageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   refetch: () => void;
+  onEdit: (tag: Tag) => void;
 }
 
 export function TagsTable({
@@ -38,12 +40,13 @@ export function TagsTable({
   onPageChange,
   onRowsPerPageChange,
   refetch,
+  onEdit,
 }: TagsTableProps): React.JSX.Element {
   const handleDelete = async (id: string): Promise<void> => {
     // eslint-disable-next-line no-alert -- Allow confirm for delete action
     if (confirm('คุณต้องการลบ Tag นี้หรือไม่?')) {
       try {
-        await api.delete(`/tag/${id}`);
+        await api.delete(`master/tag/${id}`);
         refetch();
       } catch (error) {
         // eslint-disable-next-line no-alert -- Allow alert for error notification
@@ -54,7 +57,7 @@ export function TagsTable({
 
   const handleToggleStatus = async (id: string, currentStatus: boolean): Promise<void> => {
     try {
-      await api.patch(`/tag/${id}`, { isActive: !currentStatus });
+      await api.patch(`master/tag/${id}`, { isActive: !currentStatus });
       refetch();
     } catch (error) {
       // eslint-disable-next-line no-alert -- Allow alert for error notification
@@ -97,6 +100,16 @@ export function TagsTable({
                 <TableCell>{new Date(tag.createdAt).toLocaleDateString('th-TH')}</TableCell>
                 <TableCell align="right">
                   <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<PencilSimpleIcon />}
+                      onClick={() => {
+                        onEdit(tag);
+                      }}
+                    >
+                      แก้ไข
+                    </Button>
                     <Button
                       variant="outlined"
                       size="small"
