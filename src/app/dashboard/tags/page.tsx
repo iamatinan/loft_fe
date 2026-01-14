@@ -103,6 +103,7 @@ export default function Page(): React.JSX.Element {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [keyword, setKeyword] = React.useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+  const [editingTag, setEditingTag] = React.useState<Tag | null>(null);
 
   const { data, loading, error, refetch } = useTags(page, rowsPerPage, keyword);
 
@@ -126,11 +127,17 @@ export default function Page(): React.JSX.Element {
 
   const handleCloseModal = (): void => {
     setIsCreateModalOpen(false);
+    setEditingTag(null);
+  };
+
+  const handleEdit = (tag: Tag): void => {
+    setEditingTag(tag);
+    setIsCreateModalOpen(true);
   };
 
   const initialValues: IinitialValuesCreateTag = {
-    name: '',
-    description: '',
+    name: editingTag?.name ?? '',
+    description: editingTag?.description ?? '',
   };
 
   const handleSubmit = async (
@@ -142,15 +149,19 @@ export default function Page(): React.JSX.Element {
         ...values,
         description: values.description === '' ? null : values.description,
       };
-      await api.post('/master/tag', payload);
+      if (editingTag) {
+        await api.patch(`/master/tag/${editingTag._id}`, payload);
+      } else {
+        await api.post('/master/tag', payload);
+      }
       resetForm();
       handleCloseModal();
       refetch();
     } catch (err) {
       // eslint-disable-next-line no-console -- Allow console for error logging
-      console.error('Failed to create tag:', err);
+      console.error('Failed to save tag:', err);
       // eslint-disable-next-line no-alert -- Allow alert for error notification
-      alert('เกิดข้อผิดพลาดในการสร้าง Tag');
+      alert('เกิดข้อผิดพลาดในการบันทึก Tag');
     } finally {
       setSubmitting(false);
     }
@@ -190,11 +201,12 @@ export default function Page(): React.JSX.Element {
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleRowsPerPageChange}
           refetch={refetch}
+          onEdit={handleEdit}
         />
       )}
 
-      <AddTagModal open={isCreateModalOpen} handleClose={handleCloseModal} title="เพิ่ม Tag ใหม่">
-        <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
+      <AddTagModal open={isCreateModalOpen} handleClose={handleCloseModal} title={editingTag ? 'แก้ไข Tag' : 'เพิ่ม Tag ใหม่'}>
+        <Formik initialValues={initialValues} validationSchema={validationSchema} enableReinitialize onSubmit={handleSubmit}>
           {({ isSubmitting }) => (
             <Form>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
