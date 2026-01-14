@@ -11,6 +11,7 @@ import { TodayMessages } from '@/components/dashboard/overview/today-messages';
 import { TotalAppointmentsToday } from '@/components/dashboard/overview/total-appointments-today';
 import { TotalCustomers } from '@/components/dashboard/overview/total-customers';
 import { TotalMessageAsk } from '@/components/dashboard/overview/total-message-ask';
+import { ConversionRate } from '@/components/dashboard/overview/conversion-rate';
 import api from '@/utils/api';
 
 interface TagData {
@@ -24,6 +25,11 @@ interface DashboardData {
   totalMessageAsk: number;
   totalAppointmentToday: number;
   tag: TagData[];
+  percent: number;
+  totalAppointments: number;
+  totalReply: number;
+  totalConfirmed: number;
+  totalNoConfirmed: number;
 }
 
 interface TimeData {
@@ -38,6 +44,11 @@ export default function Page(): React.JSX.Element {
     totalMessageAsk: 0,
     totalAppointmentToday: 0,
     tag: [],
+    percent: 0,
+    totalAppointments: 0,
+    totalReply: 0,
+    totalConfirmed: 0,
+    totalNoConfirmed: 0,
   });
   const [loading, setLoading] = React.useState(true);
   const [currentTime, setCurrentTime] = React.useState<string>('');
@@ -137,6 +148,17 @@ export default function Page(): React.JSX.Element {
         <TotalAppointmentsToday 
           sx={{ height: '100%' }} 
           value={loading ? '...' : dashboardData.totalAppointmentToday.toLocaleString()} 
+        />
+      </Grid>
+      <Grid lg={3} sm={6} xs={12}>
+        <ConversionRate
+          sx={{ height: '100%' }}
+          percent={dashboardData.percent || 0}
+          totalAppointments={dashboardData.totalAppointments || 0}
+          totalReply={dashboardData.totalReply || 0}
+          totalConfirmed={dashboardData.totalConfirmed || 0}
+          totalNoConfirmed={dashboardData.totalAppointments - dashboardData.totalConfirmed || 0}
+          loading={loading}
         />
       </Grid>
 
