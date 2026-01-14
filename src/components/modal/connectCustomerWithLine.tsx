@@ -170,6 +170,7 @@ export function ConnectCustomerWithLine({
     setKeyword(event.target.value);
     setPage(0);
   };
+  console.log('lineDataxxx', lineData);
 
 
   return (
@@ -182,8 +183,7 @@ export function ConnectCustomerWithLine({
     >
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6" component="h2">
-          {'กำลังเชื่อมต่อ Line: '}
-          {lineData?.data ? `${lineData.data.displayName}` : 'Loading...'}
+          {"line " + (lineData?.data ? `${lineData.data.displayName}` : 'Loading...') + 'กำลังเชื่อมต่อ กับ : ' + (lineData?.data.contactId ? `${lineData.data.contactId.firstName}` : 'Loading...')}
         </Typography>
 
         {lineData?.contactId && (
