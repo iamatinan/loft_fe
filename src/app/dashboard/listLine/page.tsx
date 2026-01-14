@@ -18,7 +18,7 @@ import api from '@/utils/api';
 
 
 // ย้าย useLines จาก customers-table มาไว้ที่นี่
-function useLines(page: number, rowsPerPage: number, keyword: string) {
+function useLines(page: number, rowsPerPage: number, keyword: string, isCustomerUnsynced: boolean) {
   const [data, setData] = React.useState<MetaLineProfileData>();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -33,6 +33,7 @@ function useLines(page: number, rowsPerPage: number, keyword: string) {
           page: page + 1,
           showDataAll: false,
           ...(keyword ? { keyword } : {}),
+          ...(isCustomerUnsynced ? { isCustomerUnsynced } : {}),
         },
       });
       // console.log('response', response);
@@ -44,7 +45,7 @@ function useLines(page: number, rowsPerPage: number, keyword: string) {
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, keyword]);
+  }, [page, rowsPerPage, keyword, isCustomerUnsynced]);
 
   React.useEffect(() => {
     void fetchLines();
@@ -60,7 +61,8 @@ export default function Page(): React.JSX.Element {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [keyword, setKeyword] = React.useState('');
-  const { data: lineData, loading, error, refetch } = useLines(page, rowsPerPage, keyword);
+  const [isCustomerUnsynced, setIsCustomerUnsynced] = React.useState(false);
+  const { data: lineData, loading, error, refetch } = useLines(page, rowsPerPage, keyword, isCustomerUnsynced);
 
   // Handler สำหรับเปลี่ยนหน้า/จำนวนแถว
   const handleChangePage = (_: unknown, newPage: number) => {
@@ -72,6 +74,10 @@ export default function Page(): React.JSX.Element {
   };
   const handleKeywordChange = (value: string) => {
     setKeyword(value);
+    setPage(0);
+  };
+  const handleIsCustomerUnsyncedChange = (value: boolean) => {
+    setIsCustomerUnsynced(value);
     setPage(0);
   };
 
@@ -94,10 +100,14 @@ export default function Page(): React.JSX.Element {
       {/* Loading & Error */}
       {loading && <Box display="flex" justifyContent="center" my={2}><CircularProgress /></Box>}
       {error && <Box color="error.main">{error}</Box>}
-      {/* <CustomersFilters
+      <CustomersFilters
         keyword={keyword}
         onKeywordChange={handleKeywordChange}
-      /> */}
+        showUnsyncedFilter={true}
+        isUnsynced={isCustomerUnsynced}
+        onUnsyncedChange={handleIsCustomerUnsyncedChange}
+        unsyncedLabel="Line ที่ไม่ได้ผูกลูกค้า"
+      />
       <ListLineTable
         lineData={lineData}
         page={page}

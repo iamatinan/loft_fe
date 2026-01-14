@@ -182,62 +182,101 @@ export function ConnectLineWithContact({ open, handleClose, contactId, contactNa
         <Typography id="modal-modal-description" sx={{ mt: 2 }}>
           {/* {children} */}
           <LineFilters keyword={keyword} onKeywordChange={handleKeywordChange} />
-          {(lineProfile?.data.length ?? 0) > 0 ? (
-            <>
-              {lineProfile?.data.map((item: any, index) => (
-                <Card sx={{ maxWidth: 345 }} key={item._id}>
-                  <img src={item.picPath} alt="Profile" style={{ width: '100px', height: '100px' }} />
-                  <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                      {item.displayName}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      สถานะ: {item.statusMessage}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      เชื่อมต่อกับผู้ติดต่อ:{' '}
-                      {item.contactId ? item.contactId?.firstName + ' ' + item.contactId?.lastName : 'ยังไม่ระบุ'}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    {item.contactId ? (
-                      <>
-                        <Button
-                          disabled={true}
-                          size="small"
-                          onClick={() => {
-                            connectLineWithContactz(contactId, item._id);
-                            handleClose();
-                          }}
-                        >
-                          เชื่อมต่อ
-                        </Button>
-                        <Button
-                          size="small"
-                          onClick={() => {
-                            handleCancelConnect(contactId, item._id);
-                            handleClose();
-                          }}
-                        >
-                          ยกเลิกการเชื่อมต่อ
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        size="small"
-                        onClick={() => {
-                          connectLineWithContactz(contactId, item._id);
-                          handleClose();
-                        }}
-                      >
-                        เชื่อมต่อ
-                      </Button>
-                    )}
-                  </CardActions>
-                </Card>
-              ))}
-            </>
-          ) : null}
+          {(() => {
+            const linkedLine = contactData?.lineProfileId;
+            const listData = lineProfile?.data || [];
+
+            // Construct the list with linkedLine at the top if it exists
+            let displayList = [...listData];
+
+            if (linkedLine && typeof linkedLine === 'object' && linkedLine._id) {
+              // Remove linkedLine from the fetched list to avoid duplicates
+              displayList = displayList.filter(l => l._id !== linkedLine._id);
+
+              // Ensure linkedLine has the necessary fields for display
+              const paddedLine = {
+                ...linkedLine,
+                // If contactId is somehow not populated in the line object inside contactData,
+                // we can default it to the current contact we have info about.
+                contactId: linkedLine.contactId || (contactData ? {
+                  _id: contactData._id,
+                  firstName: contactData.firstName,
+                  lastName: contactData.lastName
+                } : null)
+              };
+
+              displayList = [paddedLine, ...displayList];
+            }
+
+            if (displayList.length > 0) {
+              return (
+                <>
+                  {displayList.map((item: any, index) => (
+                    <Card
+                      sx={{
+                        maxWidth: 345,
+                        mt: 2,
+                        // Highlight the connected one
+                        border: item._id === linkedLine?._id ? '2px solid #4caf50' : undefined
+                      }}
+                      key={item._id}
+                    >
+                      <img src={item.picPath} alt="Profile" style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
+                      <CardContent>
+                        <Typography gutterBottom variant="h5" component="div">
+                          {item.displayName} {item._id === linkedLine?._id && <span style={{ fontSize: '0.8em', color: '#4caf50' }}>(Connected)</span>}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          สถานะ: {item.statusMessage}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          เชื่อมต่อกับผู้ติดต่อ:{' '}
+                          {item.contactId ? item.contactId?.firstName + ' ' + item.contactId?.lastName : 'ยังไม่ระบุ'}
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        {item.contactId ? (
+                          <>
+                            <Button
+                              disabled={true}
+                              size="small"
+                              onClick={() => {
+                                connectLineWithContactz(contactId, item._id);
+                                handleClose();
+                              }}
+                            >
+                              เชื่อมต่อ
+                            </Button>
+                            <Button
+                              size="small"
+                              onClick={() => {
+                                handleCancelConnect(contactId, item._id);
+                                handleClose();
+                              }}
+                            >
+                              ยกเลิกการเชื่อมต่อ
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              connectLineWithContactz(contactId, item._id);
+                              handleClose();
+                            }}
+                          >
+                            เชื่อมต่อ
+                          </Button>
+                        )}
+                      </CardActions>
+                    </Card>
+                  ))}
+                </>
+              );
+            } else {
+              return null;
+            }
+          })()}
         </Typography>
         <Button onClick={handleClose} variant="contained" color="primary" sx={{ mt: 2 }}>
           Close

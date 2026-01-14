@@ -3,7 +3,7 @@ import Card from '@mui/material/Card';
 import InputAdornment from '@mui/material/InputAdornment';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import { FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material';
+import { Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, Stack } from '@mui/material';
 
 interface Tag {
   _id: string;
@@ -15,9 +15,13 @@ interface Tag {
 interface CustomersFiltersProps {
   keyword: string;
   onKeywordChange: (value: string) => void;
-  tagId: string;
-  onTagChange: (value: string) => void;
-  tags: Tag[];
+  tagId?: string;
+  onTagChange?: (value: string) => void;
+  tags?: Tag[];
+  showUnsyncedFilter?: boolean;
+  isUnsynced?: boolean;
+  onUnsyncedChange?: (value: boolean) => void;
+  unsyncedLabel?: string;
 }
 
 export function CustomersFilters({
@@ -26,6 +30,10 @@ export function CustomersFilters({
   tagId,
   onTagChange,
   tags,
+  showUnsyncedFilter,
+  isUnsynced,
+  onUnsyncedChange,
+  unsyncedLabel = 'Show Unsynced',
 }: CustomersFiltersProps): React.JSX.Element {
   const [inputValue, setInputValue] = React.useState(keyword);
   React.useEffect(() => {
@@ -58,25 +66,38 @@ export function CustomersFilters({
           }
           sx={{ maxWidth: '500px' }}
         />
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel id="tag-filter-label">กรองตาม Tag</InputLabel>
-          <Select
-            labelId="tag-filter-label"
-            id="tag-filter"
-            value={tagId}
-            label="กรองตาม Tag"
-            onChange={(e) => onTagChange(e.target.value)}
-          >
-            <MenuItem value="">
-              <em>ทั้งหมด</em>
-            </MenuItem>
-            {tags.map((tag) => (
-              <MenuItem key={tag._id} value={tag._id}>
-                {tag.name}
+        {tags && onTagChange && (
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel id="tag-filter-label">กรองตาม Tag</InputLabel>
+            <Select
+              labelId="tag-filter-label"
+              id="tag-filter"
+              value={tagId}
+              label="กรองตาม Tag"
+              onChange={(e) => onTagChange(e.target.value)}
+            >
+              <MenuItem value="">
+                <em>ทั้งหมด</em>
               </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+              {tags.map((tag) => (
+                <MenuItem key={tag._id} value={tag._id}>
+                  {tag.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+        {showUnsyncedFilter && onUnsyncedChange && (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isUnsynced}
+                onChange={(e) => onUnsyncedChange(e.target.checked)}
+              />
+            }
+            label={unsyncedLabel}
+          />
+        )}
       </Stack>
     </Card>
   );

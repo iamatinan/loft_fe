@@ -44,7 +44,8 @@ function useCustomers(
   keyword: string,
   tagId: string,
   orderBy?: string,
-  orderType?: -1 | 1
+  orderType?: -1 | 1,
+  isLineUnsynced?: boolean
 ) {
   const [data, setData] = React.useState<MetaCustomerData>();
   const [loading, setLoading] = React.useState(false);
@@ -63,6 +64,7 @@ function useCustomers(
           ...(tagId ? { tagId } : {}),
           ...(orderBy ? { orderBy } : {}),
           ...(orderType ? { orderType } : {}),
+          ...(isLineUnsynced ? { isLineUnsynced } : {}),
         },
       });
       // Interceptor ใน api.ts จะแปลง response.data.data -> response.data แล้ว
@@ -72,7 +74,7 @@ function useCustomers(
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, keyword, tagId, orderBy, orderType]);
+  }, [page, rowsPerPage, keyword, tagId, orderBy, orderType, isLineUnsynced]);
 
   React.useEffect(() => {
     void fetchCustomers();
@@ -175,6 +177,7 @@ export default function Page(): React.JSX.Element {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [keyword, setKeyword] = React.useState('');
   const [tagId, setTagId] = React.useState('');
+  const [isLineUnsynced, setIsLineUnsynced] = React.useState(false);
   const [orderBy, setOrderBy] = React.useState<string>('');
   const [orderType, setOrderType] = React.useState<-1 | 1>(1);
   const {
@@ -182,7 +185,7 @@ export default function Page(): React.JSX.Element {
     loading,
     error,
     refetch,
-  } = useCustomers(page, rowsPerPage, keyword, tagId, orderBy, orderType);
+  } = useCustomers(page, rowsPerPage, keyword, tagId, orderBy, orderType, isLineUnsynced);
   const { tags } = useTags();
 
   // Handler สำหรับเปลี่ยนหน้า/จำนวนแถว
@@ -199,6 +202,10 @@ export default function Page(): React.JSX.Element {
   };
   const handleTagChange = (value: string) => {
     setTagId(value);
+    setPage(0);
+  };
+  const handleIsLineUnsyncedChange = (value: boolean) => {
+    setIsLineUnsynced(value);
     setPage(0);
   };
 
@@ -424,6 +431,10 @@ export default function Page(): React.JSX.Element {
         tagId={tagId}
         onTagChange={handleTagChange}
         tags={tags}
+        showUnsyncedFilter={true}
+        isUnsynced={isLineUnsynced}
+        onUnsyncedChange={handleIsLineUnsyncedChange}
+        unsyncedLabel="ลูกค้าที่ยังไม่ได้ sync line"
       />
       <CustomersTable
         customer={customerData?.data}
