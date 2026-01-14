@@ -170,7 +170,6 @@ export function ConnectCustomerWithLine({
     setKeyword(event.target.value);
     setPage(0);
   };
-  console.log('lineDataxxx', lineData);
 
 
   return (
@@ -206,67 +205,105 @@ export function ConnectCustomerWithLine({
           {loading && <Typography>กำลังโหลด...</Typography>}
           {error && <Typography color="error">{error}</Typography>}
 
-          {(customers?.data.length ?? 0) > 0 ? (
-            <>
-              {customers?.data.map((customer: Customer) => (
-                <Card sx={{ maxWidth: 345, mb: 2 }} key={customer._id}>
-                  {customer.lineProfileId?.picPath && (
-                    <CardMedia
-                      component="img"
-                      height="80"
-                      image={customer.lineProfileId.picPath}
-                      alt={customer.lineProfileId.displayName}
-                      sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5' }}
-                    />
-                  )}
-                  <CardContent>
-                    <Typography gutterBottom variant="h5" component="div">
-                      {customer.firstName} {customer.lastName}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      เบอร์โทร: {customer.phone || 'ไม่ระบุ'}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      อีเมล: {customer.email || 'ไม่ระบุ'}
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      เชื่อมต่อกับ Line: {customer.lineProfileId ? customer.lineProfileId.displayName : 'ยังไม่ระบุ'}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    {customer.lineProfileId ? (
-                      <>
-                        <Button disabled={true} size="small">
-                          เชื่อมต่อ
-                        </Button>
-                        <Button
-                          size="small"
-                          onClick={() => {
-                            handleCancelConnect(customer._id, lineProfileId);
-                            handleClose();
-                          }}
-                        >
-                          ยกเลิกการเชื่อมต่อ
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        size="small"
-                        onClick={() => {
-                          connectLineWithContact(customer._id, lineProfileId);
-                          handleClose();
-                        }}
-                      >
-                        เชื่อมต่อ
-                      </Button>
-                    )}
-                  </CardActions>
-                </Card>
-              ))}
-            </>
-          ) : (
-            !loading && <Typography>ไม่พบข้อมูลลูกค้า</Typography>
-          )}
+          {(() => {
+            const linkedContact = lineData?.data?.contactId;
+            const listData = customers?.data || [];
+
+            // Construct the list with linkedContact at the top if it exists
+            let displayList = [...listData];
+
+            if (linkedContact && typeof linkedContact === 'object') {
+              // Remove linkedContact from the fetched list to avoid duplicates
+              displayList = displayList.filter(c => c._id !== linkedContact._id);
+
+              // Ensure linkedContact has the necessary fields for display
+              // We patch lineProfileId if it's missing but we know it's connected to THIS line
+              const paddedContact = {
+                ...linkedContact,
+                // If lineProfileId is somehow not populated in the contact object inside lineData,
+                // we can default it to the current line profile we have info about.
+                lineProfileId: linkedContact.lineProfileId || (lineData?.data ? {
+                  _id: lineData.data._id,
+                  displayName: lineData.data.displayName,
+                  picPath: lineData.data.picPath
+                } : null)
+              };
+
+              displayList = [paddedContact, ...displayList];
+            }
+
+            if (displayList.length > 0) {
+              return (
+                <>
+                  {displayList.map((customer: Customer) => (
+                    <Card
+                      sx={{
+                        maxWidth: 345,
+                        mb: 2,
+                        // Highlight the connected one if needed, e.g. border
+                        border: customer._id === linkedContact?._id ? '2px solid #4caf50' : undefined
+                      }}
+                      key={customer._id}
+                    >
+                      {customer.lineProfileId?.picPath && (
+                        <CardMedia
+                          component="img"
+                          height="80"
+                          image={customer.lineProfileId.picPath}
+                          alt={customer.lineProfileId.displayName}
+                          sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5' }}
+                        />
+                      )}
+                      <CardContent>
+                        <Typography gutterBottom variant="h5" component="div">
+                          {customer.firstName} {customer.lastName} {customer._id === linkedContact?._id && <span style={{ fontSize: '0.8em', color: '#4caf50' }}>(Connected)</span>}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          เบอร์โทร: {customer.phone || 'ไม่ระบุ'}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          อีเมล: {customer.email || 'ไม่ระบุ'}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          เชื่อมต่อกับ Line: {customer.lineProfileId ? customer.lineProfileId.displayName : 'ยังไม่ระบุ'}
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        {customer.lineProfileId ? (
+                          <>
+                            <Button disabled={true} size="small">
+                              เชื่อมต่อ
+                            </Button>
+                            <Button
+                              size="small"
+                              onClick={() => {
+                                handleCancelConnect(customer._id, lineProfileId);
+                                handleClose();
+                              }}
+                            >
+                              ยกเลิกการเชื่อมต่อ
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              connectLineWithContact(customer._id, lineProfileId);
+                              handleClose();
+                            }}
+                          >
+                            เชื่อมต่อ
+                          </Button>
+                        )}
+                      </CardActions>
+                    </Card>
+                  ))}
+                </>
+              );
+            } else {
+              return !loading && <Typography>ไม่พบข้อมูลลูกค้า</Typography>;
+            }
+          })()}
         </Typography>
 
         <Button onClick={handleClose} variant="contained" color="primary" sx={{ mt: 2 }}>
