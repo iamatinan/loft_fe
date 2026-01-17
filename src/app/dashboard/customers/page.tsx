@@ -19,6 +19,8 @@ import { CustomersFilters } from '@/components/dashboard/customer/customers-filt
 // import { CustomersTable } from '@/components/dashboard/customer/customers-table';
 import CustomersTable from '@/components/dashboard/customer/customers-table';
 import { AddCustomerModal } from '@/components/modal/AaddCustomerModal';
+import { ImportAppointmentModal } from '@/components/modal/ImportAppointmentModal';
+import Swal from 'sweetalert2';
 
 function FormikTextField(props: FieldProps & { label?: string; fullWidth?: boolean }): React.JSX.Element {
   const { field, form, ...rest } = props;
@@ -150,10 +152,20 @@ export default function Page(): React.JSX.Element {
   const postAppointment = async (data: any, callback: any) => {
     try {
       await api.patch('/contact/add-appointment', data);
+      await Swal.fire({
+        icon: 'success',
+        title: 'สำเร็จ',
+        text: 'เพิ่มการนัดหมายสำเร็จ',
+      });
       if (callback) callback();
       // getContact(); // Refresh staff list after adding new item
     } catch (error) {
       console.error('Error posting staff data:', error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'เพิ่มการนัดหมายไม่สำเร็จ',
+      });
     }
   };
   // const getContact = async () => {
@@ -384,39 +396,17 @@ export default function Page(): React.JSX.Element {
           </Formik>
         </AddCustomerModal>
 
-        <AddCustomerModal open={modalAppointmentOpen} handleClose={handleCloseAppointment} title="บันทึกข้อมูลวันนัด">
-          <Formik
-            initialValues={{
-              body: '',
-            }}
-            // validationSchema={validationSchema}
-            onSubmit={async (values, { setSubmitting }) => {
-              const valuesToSubmit: {
-                data: string;
-              } = {
-                data: values.body,
-              };
-
-              await sleep(20);
-              postAppointment(valuesToSubmit, () => {
-                handleCloseAppointment();
-                setSubmitting(false);
-              });
-            }}
-          >
-            {({ isSubmitting, setFieldValue, values }) => (
-              <Form>
-                <Box mb={2}>
-                  <Field name="body" label="body" component={FormikTextField} fullWidth />
-                </Box>
-
-                <Button type="submit" disabled={isSubmitting} variant="contained" color="primary">
-                  บันทึก
-                </Button>
-              </Form>
-            )}
-          </Formik>
-        </AddCustomerModal>
+        <ImportAppointmentModal
+          open={modalAppointmentOpen}
+          onClose={handleCloseAppointment}
+          onSave={async (parsedData) => {
+            await sleep(20);
+            // Sending the parsed JSON directly to the API
+            postAppointment(parsedData, () => {
+              handleCloseAppointment();
+            });
+          }}
+        />
       </Stack>
       {/* Loading & Error */}
       {loading && (
