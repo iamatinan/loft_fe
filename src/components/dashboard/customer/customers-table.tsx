@@ -201,6 +201,15 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
     return dayjs(dates[0]).format('DD/MM/YYYY');
   };
 
+  const forLastDate = (dates: Date[] | undefined): string => {
+    if (!dates) return '-';
+    if (dates && dates.length === 0) return '-';
+    const lastDate = dates[dates.length - 1];
+    if (!dayjs(lastDate).isValid()) return '-';
+
+    return dayjs(lastDate).format('DD/MM/YYYY');
+  };
+
   const renderTags = (row: CustomerInterface): React.JSX.Element => {
     // ใช้ tagIds ก่อนถ้ามี (โครงสร้างใหม่)
     if (row.tagIds && Array.isArray(row.tagIds) && row.tagIds.length > 0) {
@@ -327,8 +336,8 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
             const valuesToSubmit = {
               appointmentDate:
                 values.appointmentDate &&
-                typeof values.appointmentDate === 'object' &&
-                'toDate' in values.appointmentDate
+                  typeof values.appointmentDate === 'object' &&
+                  'toDate' in values.appointmentDate
                   ? values.appointmentDate.toDate()
                   : null,
             };
@@ -379,8 +388,8 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
             const valuesToSubmit = {
               appointmentFollowUpDate:
                 values.appointmentFollowUpDate &&
-                typeof values.appointmentFollowUpDate === 'object' &&
-                'toDate' in values.appointmentFollowUpDate
+                  typeof values.appointmentFollowUpDate === 'object' &&
+                  'toDate' in values.appointmentFollowUpDate
                   ? values.appointmentFollowUpDate.toDate()
                   : null,
             };
@@ -533,8 +542,8 @@ const CustomersTable: React.FC<CustomersTableProps> = ({
                     {row.lineProfileId && typeof row.lineProfileId === 'object' ? row.lineProfileId.displayName : '-'}
                   </TableCell>
                   <TableCell>{row.isOrthodontics ? 'ใช่' : 'ไม่'}</TableCell>
-                  <TableCell>{forFirstDate(row.appointmentDate)}</TableCell>
-                  <TableCell>{forFirstDate(row.appointmentFollowUp)}</TableCell>
+                  <TableCell>{forLastDate(row.appointmentDate)}</TableCell>
+                  <TableCell>{forLastDate(row.appointmentFollowUp)}</TableCell>
                   <TableCell>{renderTags(row)}</TableCell>
                   <TableCell>{row.isConnectLine ? <Link /> : <LinkOff />}</TableCell>
                 </TableRow>
